@@ -4,7 +4,7 @@ module.exports = {
     // static utility
     Script: {
         fromAsm: function(asm) {
-          return asm.split(' ').reduce(function(o,c,i) { 
+          return asm.split(' ').reduce((o,c,i) => { 
             if(typeof opcodes[c]!='undefined') { o.push(opcodes[c]); return o }
             else {
               var bytes = Bytes.fromHex(c)
