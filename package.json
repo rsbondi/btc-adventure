@@ -1,0 +1,26 @@
+{
+  "name": "btc-adventure",
+  "version": "1.0.0",
+  "description": "learning bitcoin under the hood",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rsbondi/btc-adventure.git"
+  },
+  "author": "Richard Bondi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rsbondi/btc-adventure/issues"
+  },
+  "homepage": "https://github.com/rsbondi/btc-adventure#readme",
+  "dependencies": {
+    "big-integer": "^1.6.26"
+  }
+}
