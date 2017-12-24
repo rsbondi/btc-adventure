@@ -46,7 +46,7 @@ fromAsm: function(asm) {
     },[])
 },
 ```
-The above will read in the code as an asm string and convert to byte array.  First we spit by spaces and iterate the results.  If we come across an known opcode, we use its hex numeric equivalent. Otherwise we read in the bytes.  `OP_2-OP_16` can be represented as the numeric value after the underscore, and there hex values are offset by `0x50`.  `1` and `0` represent `true` and `false` and the raw value is used(I think the wiki is wrong here?).  If none of these conditions are met(key or script hashes), then it seraializes to the length followed by the bytes
+The above will read in the code as an asm string and convert to byte array.  First we spit by spaces and iterate the results.  If we come across a known opcode, we use its hex numeric equivalent. Otherwise we read in the bytes.  `OP_2-OP_16` can be represented as the numeric value after the underscore, and there hex values are offset by `0x50`.  `1` and `0` represent `true` and `false` and the raw value is used(I think the wiki is wrong here?).  If none of these conditions are met(key or script hashes), then it seraializes to the length followed by the bytes
 
 ```javascript
 toAsm: function(bytes) {
