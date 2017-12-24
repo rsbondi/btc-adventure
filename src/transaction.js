@@ -37,22 +37,22 @@ const Transaction = {
           outputs: []
       }
 
-      var reader = new Biterator(Bytes.fromHex(rawtx))
+      const reader = new Biterator(Bytes.fromHex(rawtx))
       
       tx.version = reader.readInt(4)
-      var hasWitness = false
-      var incount = reader.readVarInt()
+      let hasWitness = false
+      let incount = reader.readVarInt()
       if(incount === 0x00) {
         hasWitness = reader.readInt(1)  === 0x01
         incount = reader.readVarInt()
       }
       
-      for(var i=0;i<incount;i++) {
-        var txid = Bytes.toHex(reader.readBytes(32).reverse())
-        var vout = reader.readInt(4)
-        var scriptbytes = reader.readBytes(reader.readVarInt())
-        var hex = Bytes.toHex(scriptbytes)
-        var asm = Script.toAsm(scriptbytes).join(' ')
+      for(let i=0;i<incount;i++) {
+        const txid = Bytes.toHex(reader.readBytes(32).reverse())
+        const vout = reader.readInt(4)
+        const scriptbytes = reader.readBytes(reader.readVarInt())
+        const hex = Bytes.toHex(scriptbytes)
+        const asm = Script.toAsm(scriptbytes).join(' ')
         tx.inputs.push({
           txid: txid, // little endian
           vout: vout,
@@ -64,14 +64,14 @@ const Transaction = {
         })
       }
       
-      var nout = reader.readVarInt()
+      const nout = reader.readVarInt()
       
-      for(var i=0;i<nout;i++) {
-        var out = {
+      for(let i=0;i<nout;i++) {
+        let out = {
           value: reader.readInt(8)/100000000,
           n: i
         }
-        var scriptbytes = reader.readBytes(reader.readVarInt())
+        const scriptbytes = reader.readBytes(reader.readVarInt())
         out.scriptPubKey = {
           asm:  Script.toAsm(scriptbytes).join(' '),
           hex: Bytes.toHex(scriptbytes)
@@ -80,10 +80,10 @@ const Transaction = {
       }
       
       if(hasWitness) {
-        for(var i=0;i<incount;i++) {
-          var len = reader.readVarInt()
+        for(let i=0;i<incount;i++) {
+          const len = reader.readVarInt()
           tx.inputs[i].txinwitness = []
-          for(var w=0;w<len;w++) {
+          for(let w=0;w<len;w++) {
             tx.inputs[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
           }
         }  
