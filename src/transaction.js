@@ -88,6 +88,9 @@ const Transaction = {
           }
         }  
       }
+
+      tx.locktime = reader.readInt(4)
+      
       return tx    
     }
 }

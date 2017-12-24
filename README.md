@@ -8,3 +8,9 @@ Error checking is omitted for clarity
 There are plenty of battle tested libraries out there, so the objective is not to create yet another one.
 
 Thank you for taking the time to share in the journey with me and I hope you and I can work together on creating a brighter future.
+
+# Table of contents
+Section Name | Text | Code
+-------------| ---- | ----
+Parsing raw bitcoin script | [read](./doc/script.md) | [script.js](./src/script.js) / [common.js](./src/common.js)
+Parsing raw bitcoin transaction | [read](./doc/transaction.md) | [transaction.js](./src/transaction.js)

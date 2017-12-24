@@ -129,7 +129,7 @@ const hex = Bytes.toHex(scriptbytes)
 const asm = Script.toAsm(scriptbytes).join(' ')
 ```
 
-And we add to our input array
+And we add to our input array, along with the next 4 byte integer for the `sequence`
 
 ```javascript
 tx.inputs.push({
@@ -144,6 +144,55 @@ tx.inputs.push({
 ```
  *note, we are not done yet with the inputs, they may have witness data*
 
- 
+Outputs are read in a similar manner to inputs, but without any special consideration
 
+```javascript
+const nout = reader.readVarInt()
 
+for(let i=0;i<nout;i++) {
+  let out = {
+    value: reader.readInt(8)/100000000,
+    n: i
+  }
+  const scriptbytes = reader.readBytes(reader.readVarInt())
+  out.scriptPubKey = {
+    asm:  Script.toAsm(scriptbytes).join(' '),
+    hex: Bytes.toHex(scriptbytes)
+  }
+  tx.outputs.push(out)
+}
+```
+
+If there is witness data, add it.
+
+```javascript
+if(hasWitness) {
+  for(let i=0;i<incount;i++) {
+    const len = reader.readVarInt()
+    tx.inputs[i].txinwitness = []
+    for(let w=0;w<len;w++) {
+      tx.inputs[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
+    }
+  }  
+}
+
+```
+We loop through the inputs a second time adding witness data for each input.
+
+The number of witness data entries is a `varInt`
+
+```javascript
+const len = reader.readVarInt()
+```
+Loop and add witness data similar to how we did input and output loops, but converting to a hex string
+
+```javascript
+for(let w=0;w<len;w++) {
+  tx.inputs[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
+}
+```
+Finally the last 4 byte integer is the `locktime`
+
+```javascript
+tx.locktime = reader.readInt(4)
+```
