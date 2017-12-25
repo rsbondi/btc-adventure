@@ -1,3 +1,5 @@
+const bigInt = require('big-integer')
+
 const opcodes = { // copy paste from https://github.com/bcoin-org/bcoin/blob/master/lib/script/common.js
     // Push
     OP_0: 0x00,
@@ -150,7 +152,35 @@ const Bytes = {
     toHex: function (bytes) {
       return bytes.reduce((o, c) => { return o += ('0' + (c & 0xFF).toString(16)).slice(-2)},'' )
     }
-  }
+}
 
-module.exports = {opcodes: opcodes, codeops: codeops, Bytes: Bytes}
+function Biterator(bytes) {
+  if(typeof bytes === 'string') bytes = Bytes.fromHex(bytes)
+  var index = 0
+  var buf   = bytes
+
+  return {
+    readBytes: function(n) {
+      var bytes = buf.slice(index, index+n) 
+      index += n
+      return bytes
+      
+    },
+    readInt: function(n) {
+      var int = this.readBytes(n).reduce(function(o, byte, i) { 
+        return o.add(bigInt(byte).times(bigInt(256).pow(i))) // little endian lsd first, no reverse
+      }, bigInt(0)) 
+      return  int.toJSNumber()
+    },
+    readVarInt: function() {
+      var byte = this.readBytes(1)[0]
+      if(byte < 0xFD) return byte
+      else self.readInt(2 * (byte-0xFC))
+    }
+  }
+}
+
+
+
+module.exports = {opcodes: opcodes, codeops: codeops, Bytes: Bytes, Biterator: Biterator}
   

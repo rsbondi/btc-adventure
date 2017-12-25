@@ -1,32 +1,5 @@
-const { Bytes } = require('./common')
+const { Bytes, Biterator } = require('./common')
 const { Script } = require('./script')
-const bigInt = require('big-integer')
-
-// this may need to move to common, not sure yet
-function Biterator(bytes) {
-    var index = 0
-    var buf   = bytes
-  
-    return {
-      readBytes: function(n) {
-        var bytes = buf.slice(index, index+n) 
-        index += n
-        return bytes
-        
-      },
-      readInt: function(n) {
-        var int = this.readBytes(n).reduce(function(o, byte, i) { 
-          return o.add(bigInt(byte).times(bigInt(256).pow(i))) // little endian lsd first, no reverse
-        }, bigInt(0)) 
-        return  int.toJSNumber()
-      },
-      readVarInt: function() {
-        var byte = this.readBytes(1)[0]
-        if(byte < 0xFD) return byte
-        else self.readInt(2 * (byte-0xFC))
-      }
-    }
-  }
 
 const Transaction = {
     parseRaw: function(rawtx) {

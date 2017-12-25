@@ -5,7 +5,7 @@ Reference code from [transaction.js](../src/transaction.js)
 ## Biterator, iterator for bitcoin format
 
 First off we need a way to iterate the raw data within the rules of the bitcoin raw transaction format.
-I created the `Biterator` object for this
+I created the `Biterator` object for this in [common.js](../src/common.js)
 
 ```javascript
 function Biterator(bytes) {
