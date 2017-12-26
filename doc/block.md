@@ -7,7 +7,7 @@ Reference code from [block.js](../src/block.js)
 ## Block Header
 A raw block consist of an 80 byte header information and all raw transactions concatenated after the header
 
-Here is the block description verbaim from the bitcoin wiki
+Here is the block description verbatim from the bitcoin wiki
 
 | Bytes | Name                | Data Type | Description
 |-------|---------------------|-----------|----------------
