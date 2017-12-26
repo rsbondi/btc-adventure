@@ -49,8 +49,8 @@ The `Transaction` object handles parsing via static member `parseRaw` with the s
 let tx = {
     version: 1,
     locktime: 0,
-    inputs: [],
-    outputs: []
+    vin: [],
+    vout: []
 }
 ```
 Then we create or `Biterator` described above passing the bytes of the raw transaction.
@@ -93,7 +93,7 @@ for(let i=0;i<incount;i++) {
   const scriptbytes = reader.readBytes(reader.readVarInt())
   const hex = Bytes.toHex(scriptbytes)
   const asm = Script.toAsm(scriptbytes).join(' ')
-  tx.inputs.push({
+  tx.vin.push({
     txid: txid, // little endian
     vout: vout,
     scriptSig:  { 
@@ -132,7 +132,7 @@ const asm = Script.toAsm(scriptbytes).join(' ')
 And we add to our input array, along with the next 4 byte integer for the `sequence`
 
 ```javascript
-tx.inputs.push({
+tx.vin.push({
   txid: txid, 
   vout: vout,
   scriptSig:  { 
@@ -159,7 +159,7 @@ for(let i=0;i<nout;i++) {
     asm:  Script.toAsm(scriptbytes).join(' '),
     hex: Bytes.toHex(scriptbytes)
   }
-  tx.outputs.push(out)
+  tx.vout.push(out)
 }
 ```
 
@@ -169,9 +169,9 @@ If there is witness data, add it.
 if(hasWitness) {
   for(let i=0;i<incount;i++) {
     const len = reader.readVarInt()
-    tx.inputs[i].txinwitness = []
+    tx.vin[i].txinwitness = []
     for(let w=0;w<len;w++) {
-      tx.inputs[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
+      tx.vin[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
     }
   }  
 }
@@ -188,7 +188,7 @@ Loop and add witness data similar to how we did input and output loops, but conv
 
 ```javascript
 for(let w=0;w<len;w++) {
-  tx.inputs[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
+  tx.vin[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
 }
 ```
 Finally the last 4 byte integer is the `locktime`

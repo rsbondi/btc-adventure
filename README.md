@@ -14,3 +14,4 @@ Section Name | Text | Code
 -------------| ---- | ----
 Parsing raw bitcoin script | [read](./doc/script.md) | [script.js](./src/script.js) / [common.js](./src/common.js)
 Parsing raw bitcoin transaction | [read](./doc/transaction.md) | [transaction.js](./src/transaction.js)
+Parsing raw block | [read](./doc/block.md) | [block.js](./src/block.js)

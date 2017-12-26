@@ -1,13 +1,15 @@
 const { Bytes, Biterator } = require('./common')
 const { Script } = require('./script')
 
+// TODO: coninbase seems to parse but has different format
+
 const Transaction = {
     parseRaw: function(rawtx) {
       let tx = {
           version: 1,
           locktime: 0,
-          inputs: [],
-          outputs: []
+          vin: [],
+          vout: []
       }
 
       const reader = new Biterator(Bytes.fromHex(rawtx))
@@ -26,7 +28,7 @@ const Transaction = {
         const scriptbytes = reader.readBytes(reader.readVarInt())
         const hex = Bytes.toHex(scriptbytes)
         const asm = Script.toAsm(scriptbytes).join(' ')
-        tx.inputs.push({
+        tx.vin.push({
           txid: txid, // little endian
           vout: vout,
           scriptSig:  { 
@@ -49,15 +51,15 @@ const Transaction = {
           asm:  Script.toAsm(scriptbytes).join(' '),
           hex: Bytes.toHex(scriptbytes)
         }
-        tx.outputs.push(out)
+        tx.vout.push(out)
       }
       
       if(hasWitness) {
         for(let i=0;i<incount;i++) {
           const len = reader.readVarInt()
-          tx.inputs[i].txinwitness = []
+          tx.vin[i].txinwitness = []
           for(let w=0;w<len;w++) {
-            tx.inputs[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
+            tx.vin[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
           }
         }  
       }
