@@ -2,7 +2,6 @@ const { Bytes, Biterator, Hash } = require('./common')
 const { Script } = require('./script')
 
 // TODO: coninbase seems to parse but has different format
-// Also, hash parses correctly for individual transaction but not when in block, fix in block.js?
 
 const Transaction = {
     parseRaw: function(rawtx) {
@@ -56,7 +55,6 @@ const Transaction = {
       }
       let witnessStart = 0
       let witnessSize = 0
-      let noseg = ''
       if(hasWitness) {
         witnessStart = reader.getIndex() 
         witnessSize = witnessStart + 2 // +lock time - marker - flag
@@ -67,19 +65,21 @@ const Transaction = {
             tx.vin[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
           }
         }  
-        noseg = rawtx.slice(0, 8 /* version*/) + 
-                rawtx.slice(12, witnessStart * 2  /* skip marker/flag, to witness - marker/flag */) + 
-                rawtx.slice(rawtx.length - 8, rawtx.length)
       }
-
-      const txhash = Bytes.reverseHex(Hash.datahash(rawtx))
-      tx.txid = hasWitness ? Bytes.reverseHex(Hash.datahash(noseg))
-        : txhash
-      tx.hash = txhash
 
       tx.locktime = reader.readInt(4)
       tx.size = reader.getIndex()
       tx.vsize = hasWitness ? Math.ceil((witnessSize*3+tx.size) / 4) : tx.size
+      
+      const noseg = hasWitness ? rawtx.slice(0, 8 /* version*/) +
+        rawtx.slice(12, witnessStart * 2  /* skip marker/flag, to witness - marker/flag */) +
+        rawtx.slice(tx.size * 2 - 8, tx.size * 2) : ''
+      // the previous and following lines limit to the calculated size of the transaction, 
+      // since in the block thay are concatenated and we don't know until we get here
+      const txhash = Bytes.reverseHex(Hash.datahash(rawtx.slice(0,tx.size*2)))
+      tx.txid = hasWitness ? Bytes.reverseHex(Hash.datahash(noseg))
+        : txhash
+      tx.hash = txhash
 
       return tx    
     }
