@@ -63,6 +63,7 @@ const Transaction = {
       }
 
       tx.locktime = reader.readInt(4)
+      tx.size = reader.getIndex()
       
       return tx    
     }

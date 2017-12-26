@@ -1,4 +1,5 @@
 const { Bytes, Biterator } = require('./common')
+const { Transaction } = require('./transaction')
 
 const Block = {
     parseRaw: function(blockstr) {
@@ -12,7 +13,16 @@ const Block = {
             nonce    : reader.readInt(4)
         }
 
-        return header
+        const ntx = reader.readVarInt()
+
+        let txs =[]
+        let txbuf = Bytes.toHex(reader.getRemaining())
+        for(let t=0; t<ntx; t++) {
+            const tx = Transaction.parseRaw(txbuf)
+            txs.push(tx)
+            txbuf = txbuf.slice(tx.size*2) 
+        }
+        return {header: header, transactions: txs} 
     }
 }
 

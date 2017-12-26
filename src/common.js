@@ -175,8 +175,12 @@ function Biterator(bytes) {
     readVarInt: function() {
       var byte = this.readBytes(1)[0]
       if(byte < 0xFD) return byte
-      else self.readInt(2 * (byte-0xFC))
-    }
+      else this.readInt(2 * (byte-0xFC))
+    },
+    getRemaining: function() {
+        return buf.slice(index)
+    },
+    getIndex: function() { return index }
   }
 }
 
