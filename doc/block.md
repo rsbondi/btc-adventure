@@ -18,7 +18,10 @@ Here is the block description verbaim from the bitcoin wiki
 | 4     | nBits               | uint32_t  | An encoded version of the target threshold this block's header hash must be less than or equal to.  See the nBits format described below.
 | 4     | nonce               | uint32_t  | An arbitrary number miners change to modify the header hash in order to produce a hash less than or equal to the target threshold.  If all 32-bit values are tested, the time can be updated or the coinbase transaction can be changed and the merkle root updated.
 
+### Header parsing
+
 ```javascript
+
 parseRaw: function(blockstr) {
     const reader   = new Biterator(blockstr)
     const header = {
@@ -34,6 +37,8 @@ parseRaw: function(blockstr) {
 ```
 
 The above is just applying what we learned in previous sections to the definition in the table
+
+### Transaction parsing
 
 ```javascript
     const ntx = reader.readVarInt()
