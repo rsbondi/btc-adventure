@@ -1,4 +1,6 @@
 const bigInt = require('big-integer')
+const crypto = require('crypto')
+const ripemd160 = require('ripemd160')
 
 const opcodes = { // copy paste from https://github.com/bcoin-org/bcoin/blob/master/lib/script/common.js
     // Push
@@ -151,7 +153,8 @@ const Bytes = {
     },
     toHex: function (bytes) {
       return bytes.reduce((o, c) => { return o += ('0' + (c & 0xFF).toString(16)).slice(-2)},'' )
-    }
+    },
+    reverseHex: function(hex) { return Bytes.toHex(Bytes.fromHex(hex).reverse()) }
 }
 
 function Biterator(bytes) {
@@ -184,7 +187,14 @@ function Biterator(bytes) {
   }
 }
 
+const Hash = {
+  sha256: function(hexstr) { return crypto.createHash('sha256').update(new Buffer(hexstr, 'hex')).digest('hex') }, // shorthand
+  rmd160: function(hexstr) { return new ripemd160().update(new Buffer(hexstr, 'hex')).digest('hex') },  // shorthand
+  datahash: function (data) { return Hash.sha256(Hash.sha256(data)) }, // txid is revers of this
+  pubhash: function (data) { return Hash.rmd160(Hash.sha256(data)) } // P2PKH hexstr = public key  
+}
 
 
-module.exports = {opcodes: opcodes, codeops: codeops, Bytes: Bytes, Biterator: Biterator}
+
+module.exports = {opcodes: opcodes, codeops: codeops, Bytes: Bytes, Biterator: Biterator, Hash: Hash}
   

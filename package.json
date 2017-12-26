@@ -21,6 +21,9 @@
   },
   "homepage": "https://github.com/rsbondi/btc-adventure#readme",
   "dependencies": {
-    "big-integer": "^1.6.26"
+    "big-integer": "^1.6.26",
+    "bs58": "^4.0.1",
+    "crypto": "^1.0.1",
+    "ripemd160": "^2.0.1"
   }
 }
