@@ -61,11 +61,14 @@ Then we create or `Biterator` described above passing the bytes of the raw trans
 const reader = new Biterator(Bytes.fromHex(rawtx))
 ```
 
+### Version
+
 The first 4 bytes of a raw transaction represent the version number
 
 ```javascript
 tx.version = reader.readInt(4)
 ```
+### Inputs
 
 Next we find the number of inputs
 
@@ -75,6 +78,7 @@ let incount = reader.readVarInt()
 
 Why is `let` used here you may ask?  This was not clear from the documentation on the bitcoin wiki, which apparently showed the pre segwit format only.  This is what I have derived from reading other code is that the byte in this position, if non zero is the nuber of inputs.  If it is zero followed by `0x01`, this indicates that the transaction has witness data.  The code I derived this from peeks ahead, but I prefer iterating in sequence, so this is resoved with the following
 
+#### Witness Data?
 ```javascript
 let hasWitness = false
 if(incount === 0x00) {
@@ -144,6 +148,8 @@ tx.vin.push({
 ```
  *note, we are not done yet with the inputs, they may have witness data*
 
+### Outputs
+
 Outputs are read in a similar manner to inputs, but without any special consideration
 
 ```javascript
@@ -167,6 +173,8 @@ If there is witness data, add it.
 
 ```javascript
 if(hasWitness) {
+  witnessStart = reader.getIndex() 
+  witnessSize = witnessStart + 2 // +lock time - marker - flag
   for(let i=0;i<incount;i++) {
     const len = reader.readVarInt()
     tx.vin[i].txinwitness = []
@@ -177,6 +185,8 @@ if(hasWitness) {
 }
 
 ```
+The first 2 lines in the `if` block are saved here, see "Sizes and Hashes" below
+
 We loop through the inputs a second time adding witness data for each input.
 
 The number of witness data entries is a `varInt`
@@ -191,8 +201,44 @@ for(let w=0;w<len;w++) {
   tx.vin[i].txinwitness.push(Bytes.toHex(reader.readBytes(reader.readVarInt())))
 }
 ```
+
+### Locktime
+
 Finally the last 4 byte integer is the `locktime`
 
 ```javascript
 tx.locktime = reader.readInt(4)
+```
+### Sizes and Hashes
+
+Now that we have everything, we can calculate the sizes and hashes
+
+```javascript
+tx.size = reader.getIndex()
+tx.vsize = hasWitness ? Math.ceil((witnessSize*3+tx.size) / 4) : tx.size
+
+const noseg = hasWitness ? rawtx.slice(0, 8) +
+  rawtx.slice(12, witnessStart * 2) +
+  rawtx.slice(tx.size * 2 - 8, tx.size * 2) : ''
+const txhash = Bytes.reverseHex(Hash.datahash(rawtx.slice(0,tx.size*2)))
+tx.txid = hasWitness ? Bytes.reverseHex(Hash.datahash(noseg))
+  : txhash
+tx.hash = txhash
+```
+
+`size` is the size, includeing witness if any
+
+`vsize` is the size excluding witness data. I found this described [here](https://bitcoincore.org/en/segwit_wallet_dev/) under the "Transaction Fee Estimation" section.
+
+The hash and txid are calculate through wrapper functions in [common.js](../src/common.js) via the `Hash` object.  If there is no witness data, the `txid` and `hash` are the same, the reverse of a double `sha256` of the raw transaction.  If witness data is present, the `hash` is the double `sha256` of the raw data, and the `txid` is double `sha256` of the raw transaction with the witness data removed.  In the above code, `noseg` represents the transaction minus witness data.  The first chunk is the version, 4 bytes so 8 hex characters.  The second chunk skips the marker and flag(see "Witness Data?" above) and goes to the start of the witness data, and the last chunk is the lock time
+
+### Hash wrappers for reference
+
+```javascript
+const Hash = {
+  sha256: function(hexstr) { return crypto.createHash('sha256').update(new Buffer(hexstr, 'hex')).digest('hex') }, 
+  rmd160: function(hexstr) { return new ripemd160().update(new Buffer(hexstr, 'hex')).digest('hex') },  
+  datahash: function (data) { return Hash.sha256(Hash.sha256(data)) }, 
+  pubhash: function (data) { return Hash.rmd160(Hash.sha256(data)) } 
+}
 ```
