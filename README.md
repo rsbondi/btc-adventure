@@ -15,6 +15,6 @@ Section Name | Text | Code
 Parsing raw bitcoin script | [read](./doc/script.md) | [script.js](./src/script.js) / [common.js](./src/common.js)
 Parsing raw bitcoin transaction | [read](./doc/transaction.md) | [transaction.js](./src/transaction.js)
 Parsing raw block | [read](./doc/block.md) | [block.js](./src/block.js)
-Building raw transaction | [read](./doc/createrawtx.md) | [transaction.js](./src/transaction.js)
-Interpreting a script | [read](./doc/interpret.md) | [interpret.js](./src/interpret.js)
+Building raw transaction [WIP] | [read](./doc/createrawtx.md) | [transaction.js](./src/transaction.js)
+Interpreting a script [WIP] | [read](./doc/interpret.md) | [interpret.js](./src/interpret.js)
 
