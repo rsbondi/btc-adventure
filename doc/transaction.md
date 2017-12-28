@@ -76,7 +76,9 @@ Next we find the number of inputs
 let incount = reader.readVarInt()
 ```
 
-Why is `let` used here you may ask?  This was not clear from the documentation on the bitcoin wiki, which apparently showed the pre segwit format only.  This is what I have derived from reading other code is that the byte in this position, if non zero is the nuber of inputs.  If it is zero followed by `0x01`, this indicates that the transaction has witness data.  The code I derived this from peeks ahead, but I prefer iterating in sequence, so this is resoved with the following
+Why is `let` used here you may ask?  With the addition of segwit the format has changed slightly.  Pre segwit the number of inputs followed the version.
+Post segwit uses what is called a "marker" and "flag" followed by the number of inputs.  If following the version is `0x00`(marker) then `0x01`(flag), 
+this indicates a segwit transaction.  See [here](https://bitcoincore.org/en/segwit_wallet_dev/#transaction-serialization) for detailed info on segwit transaction format.
 
 #### Witness Data?
 ```javascript
@@ -228,7 +230,7 @@ tx.hash = txhash
 
 `size` is the size, includeing witness if any
 
-`vsize` is the size excluding witness data. I found this described [here](https://bitcoincore.org/en/segwit_wallet_dev/) under the "Transaction Fee Estimation" section.
+`vsize` is the size excluding witness data. See [here](https://bitcoincore.org/en/segwit_wallet_dev/#transaction-fee-estimation) for description of the formula used.
 
 The hash and txid are calculate through wrapper functions in [common.js](../src/common.js) via the `Hash` object.  If there is no witness data, the `txid` and `hash` are the same, the reverse of a double `sha256` of the raw transaction.  If witness data is present, the `hash` is the double `sha256` of the raw data, and the `txid` is double `sha256` of the raw transaction with the witness data removed.  In the above code, `noseg` represents the transaction minus witness data.  The first chunk is the version, 4 bytes so 8 hex characters.  The second chunk skips the marker and flag(see "Witness Data?" above) and goes to the start of the witness data, and the last chunk is the lock time
 
