@@ -57,7 +57,7 @@ module.exports = {
       OP_AND:                 function() { throw('disabled') },
       OP_OR:                  function() { throw('disabled') },
       OP_XOR:                 function() { throw('disabled') },
-      OP_EQUAL:               function() {},                                                          // Returns 1 if the inputs are exactly equal, 0 otherwise.
+      OP_EQUAL:               function() { const b = stack.pop(); const a = stack.pop(); stack.push(a+'' == b+'' ? 1 : 0) },
       OP_EQUALVERIFY:         function() {},                                                          // Same as OP_EQUAL, but runs OP_VERIFY afterward.
       OP_RESERVED1:           function() {},                                                          // Transaction is invalid unless occuring in an unexecuted OP_IF branch
       OP_RESERVED2:           function() {},                                                          // Transaction is invalid unless occuring in an unexecuted OP_IF branch
@@ -76,38 +76,58 @@ module.exports = {
       OP_MOD:                 function() { throw('disabled') },
       OP_LSHIFT:              function() { throw('disabled') },
       OP_RSHIFT:              function() { throw('disabled') },
-      OP_BOOLAND:             function() {},
-      OP_BOOLOR:              function() {},
-      OP_NUMEQUAL:            function() {},
-      OP_NUMEQUALVERIFY:      function() {},
-      OP_NUMNOTEQUAL:         function() {},
-      OP_LESSTHAN:            function() {},
-      OP_GREATERTHAN:         function() {},
-      OP_LESSTHANOREQUAL:     function() {},
-      OP_GREATERTHANOREQUAL:  function() {},
-      OP_MIN:                 function() {},
-      OP_MAX:                 function() {},
-      OP_WITHIN:              function() {},
-      OP_RIPEMD160:           function() {},
+      OP_BOOLAND:             function() { const b = stack.pop(); const a = stack.pop(); stack.push(a!=='0' && b!=='0' ? 1 : 0) },
+      OP_BOOLOR:              function() { const b = stack.pop(); const a = stack.pop(); stack.push(a!=='0' || b!=='0' ? 1 : 0) },
+      OP_NUMEQUAL:            function() { const b = stack.pop(); const a = stack.pop(); stack.push(!isNaN(a) && !isNaN(b) && a == b ? 1 : 0) },
+      OP_NUMEQUALVERIFY:      function() {},                                                          // same as OP_NUMEQUAL, but runs OP_VERIFY afterward.
+      OP_NUMNOTEQUAL:         function() { const b = stack.pop(); const a = stack.pop(); stack.push(!isNaN(a) && !isNaN(b) && a != b ? 1 : 0) },
+      OP_LESSTHAN:            function() { const b = parseInt(stack.pop(), 10); const a = parseInt(stack.pop(), 10); stack.push(a < b ? 1 : 0) },
+      OP_GREATERTHAN:         function() { const b = parseInt(stack.pop(), 10); const a = parseInt(stack.pop(), 10); stack.push(a > b ? 1 : 0) },
+      OP_LESSTHANOREQUAL:     function() { const b = parseInt(stack.pop(), 10); const a = parseInt(stack.pop(), 10); stack.push(a <= b ? 1 : 0) },
+      OP_GREATERTHANOREQUAL:  function() { const b = parseInt(stack.pop(), 10); const a = parseInt(stack.pop(), 10); stack.push(a >= b ? 1 : 0) },
+      OP_MIN:                 function() { const b = parseInt(stack.pop(), 10); const a = parseInt(stack.pop(), 10); stack.push(Math.min(a, b)) },
+      OP_MAX:                 function() { const b = parseInt(stack.pop(), 10); const a = parseInt(stack.pop(), 10); stack.push(Math.min(a, b)) },
+      OP_WITHIN:              function() { const b = parseInt(stack.pop(), 10); const a = parseInt(stack.pop(), 10); const x = parseInt(stack.pop(), 10); stack.push(x >= a && x < b? 1 : 0) },
+      OP_RIPEMD160:           function() { stack.push(Hash.rmd160(stack.pop())) },
       OP_SHA1:                function() {},
       OP_HASH160:             function() { const top = stack.pop(); Hash.pubhash(top) },
       OP_HASH256:             function() { const top = stack.pop(); Hash.datahash(top) },
-      OP_CODESEPARATOR:       function() {},
-      OP_CHECKSIG:            function() {},
-      OP_CHECKSIGVERIFY:      function() {},
+      OP_CODESEPARATOR:       function() {},                                                          // All of the signature checking words will only match signatures to the data after the most recently-executed OP_CODESEPARATOR.
+      OP_CHECKSIG:            function() {},                                                          // [sig pubkey] The entire transaction's outputs, inputs, and script (from the most recently-executed OP_CODESEPARATOR to the end) are hashed. The signature used by OP_CHECKSIG must be a valid signature for this hash and public key. If it is, 1 is returned, 0 otherwise.
+      OP_CHECKSIGVERIFY:      function() {},                                                          // Same as OP_CHECKSIG, but OP_VERIFY is executed afterward. fail if fales
+      /*
+      Compares the first signature against each public key until it finds an ECDSA match. Starting with the subsequent public key, 
+      it compares the second signature against each remaining public key until it finds an ECDSA match. 
+      The process is repeated until all signatures have been checked or not enough public keys remain to produce a successful result. 
+      All signatures need to match a public key. Because public keys are not checked again if they fail any signature comparison, 
+      signatures must be placed in the scriptSig using the same order as their corresponding public keys were placed in the scriptPubKey or redeemScript. 
+      If all signatures are valid, 1 is returned, 0 otherwise. Due to a bug, one extra unused value is removed from the stack.
+      */
       OP_CHECKMULTISIG:       function() {},
-      OP_CHECKMULTISIGVERIFY: function() {},
-      OP_NOP1:                function() {},
+      OP_CHECKMULTISIGVERIFY: function() {},                                                         // Same as OP_CHECKSIG, but OP_VERIFY is executed afterward.
+      OP_NOP1:                function() { /* ignored */ },
+      /*
+      Marks transaction as invalid if the top stack item is greater than the transaction's nLockTime field, 
+      otherwise script evaluation continues as though an OP_NOP was executed. Transaction is also invalid if 
+      1. the stack is empty; or 
+      2. the top stack item is negative; or 
+      3. the top stack item is greater than or equal to 500000000 while the transaction's nLockTime field is less than 500000000, 
+      or vice versa; or 4. the input's nSequence field is equal to 0xffffffff. The precise semantics are described in BIP 0065
+      */
       OP_CHECKLOCKTIMEVERIFY: function() {},
+      /*
+      Marks transaction as invalid if the relative lock time of the input (enforced by BIP 0068 with nSequence) is not equal to or longer than the value of the top stack item. T
+      he precise semantics are described in BIP 0112.
+      */
       OP_CHECKSEQUENCEVERIFY: function() {},
-      OP_NOP4:                function() {},
-      OP_NOP5:                function() {},
-      OP_NOP6:                function() {},
-      OP_NOP7:                function() {},
-      OP_NOP8:                function() {},
-      OP_NOP9:                function() {},
-      OP_NOP10:               function() {},
-      OP_INVALIDOPCODE:       function() {}  ,      
+      OP_NOP4:                function() { /* ignored */ },
+      OP_NOP5:                function() { /* ignored */ },
+      OP_NOP6:                function() { /* ignored */ },
+      OP_NOP7:                function() { /* ignored */ },
+      OP_NOP8:                function() { /* ignored */ },
+      OP_NOP9:                function() { /* ignored */ },
+      OP_NOP10:               function() { /* ignored */ },
+      OP_INVALIDOPCODE:       function() { throw('invalid') }  ,      
       OP_SHA256:              function() { const top = stack.pop(); stack.push(Hash.sha256(top)) },
       OP_DUP:                 function() { stack.push(stack[stack.length-1]) },
       OP_IF:                  function() { branch.unshift(stack.pop() ? 1 : -1) },
@@ -116,7 +136,7 @@ module.exports = {
       OP_SWAP:                function() { const one = stack.pop(); const two = stack.pop(); stack.push(one); stack.push(2)},
       OP_ENDIF:               function() { branch.shift() },
       OP_DROP:                function() { stack.pop()},
-      OP_ROLL:                function() {  const index = stack.length - 1 - parseInt(stack.pop(), 10); stack.push(stack.splice(index, 1)[0]) }
+      OP_ROLL:                function() { const index = stack.length - 1 - parseInt(stack.pop(), 10); stack.push(stack.splice(index, 1)[0]) }
     }
     return {
       run: function(script) {
