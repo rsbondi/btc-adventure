@@ -45,9 +45,9 @@ module.exports = {
       OP_IFDUP:               function() { const top = stack.slice(-1); if(top) stack.push(top) },
       OP_DEPTH:               function() { stack.push(stack.length) },
       OP_OVER:                function() { stack.push( stack[stack.length-2]) },
-      OP_PICK:                function() { const top = parseInt(stack.pop(), 10); stack.push(stack[stack.length - top]) },
+      OP_PICK:                function() { const top = parseInt(stack.pop(), 10); stack.push(stack[stack.length - top - 1]) },
       OP_ROT:                 function() { stack.push(stack.splice(-3, 1)[0]) },
-      OP_TUCK:                function() { stack.splice(-3, 0, stack.slice(-1)) },
+      OP_TUCK:                function() { stack.splice(-2, 0, stack.slice(-1)[0]) },
       OP_CAT:                 function() { throw('disabled') },
       OP_SUBSTR:              function() { throw('disabled') },
       OP_LEFT:                function() { throw('disabled') },
@@ -136,7 +136,7 @@ module.exports = {
       OP_SWAP:                function() { const one = stack.pop(); const two = stack.pop(); stack.push(one); stack.push(2)},
       OP_ENDIF:               function() { branch.shift() },
       OP_DROP:                function() { stack.pop()},
-      OP_ROLL:                function() { const index = stack.length - 1 - parseInt(stack.pop(), 10); stack.push(stack.splice(index, 1)[0]) }
+      OP_ROLL:                function() { const index = stack.length - 2 - parseInt(stack.pop(), 10); stack.push(stack.splice(index, 1)[0]) } // len before pop
     }
     return {
       run: function(script) {
