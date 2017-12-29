@@ -1,4 +1,7 @@
 const { Hash } = require('./common.js')
+const crypto = require('crypto')
+const ec = new require('elliptic').ec('secp256k1');
+
 module.exports = {
   Interpretor: function() {
     // TODO: check for bool as 0 and 1
@@ -89,11 +92,11 @@ module.exports = {
       OP_MAX:                 function() { const b = parseInt(stack.pop(), 10); const a = parseInt(stack.pop(), 10); stack.push(Math.min(a, b)) },
       OP_WITHIN:              function() { const b = parseInt(stack.pop(), 10); const a = parseInt(stack.pop(), 10); const x = parseInt(stack.pop(), 10); stack.push(x >= a && x < b? 1 : 0) },
       OP_RIPEMD160:           function() { stack.push(Hash.rmd160(stack.pop())) },
-      OP_SHA1:                function() {},
-      OP_HASH160:             function() { const top = stack.pop(); Hash.pubhash(top) },
-      OP_HASH256:             function() { const top = stack.pop(); Hash.datahash(top) },
+      OP_SHA1:                function() { stack.push(Hash.sha1(stack.pop())) },
+      OP_HASH160:             function() { const top = stack.pop(); stack.push(Hash.pubhash(top)) },
+      OP_HASH256:             function() { const top = stack.pop(); stack.push(Hash.datahash(top)) },
       OP_CODESEPARATOR:       function() {},                                                          // All of the signature checking words will only match signatures to the data after the most recently-executed OP_CODESEPARATOR.
-      OP_CHECKSIG:            function() {},                                                          // [sig pubkey] The entire transaction's outputs, inputs, and script (from the most recently-executed OP_CODESEPARATOR to the end) are hashed. The signature used by OP_CHECKSIG must be a valid signature for this hash and public key. If it is, 1 is returned, 0 otherwise.
+      OP_CHECKSIG:            function() { const pub = stack.pop(); const sig = stack.pop();  },
       OP_CHECKSIGVERIFY:      function() {},                                                          // Same as OP_CHECKSIG, but OP_VERIFY is executed afterward. fail if fales
       /*
       Compares the first signature against each public key until it finds an ECDSA match. Starting with the subsequent public key, 
@@ -140,6 +143,7 @@ module.exports = {
     }
     return {
       run: function(script) {
+        if(typeof script === 'string') script = script.split(' ')
         script.forEach(op => {
             const ok = !branch.length || branch[0] > -1 || ~['OP_IF', 'OP_ELSE', 'OP_ENDIF'].indexOf(op)
             if(!ok) return

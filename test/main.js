@@ -13,4 +13,14 @@ console.log(JSON.stringify(Block.parseRaw(block).transactions, null, 2))
 
 const { Interpretor } = require('../src/interpret')
 const interpretor = new Interpretor()
-interpretor.run('OP_1 OP_2 OP_6 OP_SWAP OP_SUB OP_ADD OP_2 OP_EQUAL OP_16 OP_11 OP_NIP OP_DUP OP_DEPTH OP_TUCK OP_4 OP_2 OP_ROLL OP_ROT OP_2SWAP OP_PICK'.split(' '))
+// interpretor.run('OP_1 OP_2 OP_6 OP_SWAP OP_SUB OP_ADD OP_2 OP_EQUAL OP_16 OP_11 OP_NIP OP_DUP OP_DEPTH OP_TUCK OP_4 OP_2 OP_ROLL OP_ROT OP_2SWAP OP_PICK')
+
+// tx vin scriptSig
+interpretor.run([ '304402204ea1e79cf84ea7314853e8fb292c5b793af180bccb3022042a62a75657e8ee7c022048049996eaa447e2a9fd6edab3386978ba9006f7594bcf684803237d01dce69e', // signature
+                  '020ed68d4febc7ee85c2683e3c95b65febaee609d2c03540e49785c43f729c4f03']) // pubkey
+
+// previous tx scriptPutbKey OP_DUP OP_HASH160 66a88029995bf795717bbb1551641e6af3cb1022 OP_EQUALVERIFY OP_CHECKSIG
+interpretor.run([ 'OP_DUP',
+                  'OP_HASH160', 
+                  '66a88029995bf795717bbb1551641e6af3cb1022', 
+                  'OP_EQUAL']) // 
