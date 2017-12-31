@@ -1,4 +1,4 @@
-const { Bytes, Biterator, Hash } = require('./common')
+const { Bytes, Biterator, Hash, Bitwriter } = require('./common')
 const { Script } = require('./script')
 
 // TODO: coninbase seems to parse but has different format
@@ -82,6 +82,36 @@ const Transaction = {
       tx.hash = txhash
 
       return tx    
+    },
+    serailize: function(tx) {
+      const writer = new Bitwriter()
+
+      writer.writeInt(tx.version, 4)
+      const hasWitness = tx.vin[0].txinwitness ? 1 : 0
+
+      if(hasWitness) writer.write('0001')
+      writer.writeVarInt(tx.vin.length)
+
+      tx.vin.forEach(input => {
+        writer.write(Bytes.reverseHex(input.txid))
+        writer.writeInt(input.vout, 4)
+        writer.writeVarInt(input.scriptSig.hex.length / 2)
+        writer.write(input.scriptSig.hex)
+        writer.writeInt(input.sequence, 4)
+      }) 
+
+      writer.writeVarInt(tx.vout.length)
+      tx.vout.forEach(out => {
+        writer.writeInt(out.value * 100000000, 8)
+        writer.writeVarInt(out.scriptPubKey.hex.length/2)
+        writer.write(out.scriptPubKey.hex)
+      })
+
+      // witness here?
+      
+      writer.writeInt(tx.locktime, 4)
+      
+      return writer.getValue()
     }
 }
 

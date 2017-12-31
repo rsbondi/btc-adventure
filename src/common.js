@@ -187,6 +187,25 @@ function Biterator(bytes) {
   }
 }
 
+function Bitwriter() {
+  let buf = ''
+  return {
+    write: function(val) { buf+=val },
+    writeInt: function( val, len ) {
+      if (typeof val == 'string') val = parseInt(val, 16)
+      for (let i = 0; i < len; i++) {
+        const mod = val % 256
+        buf += Bytes.toHex([mod])
+        val = (val - mod) / 256
+      }
+    },
+    writeVarInt: function( val ) { 
+      if(val < 0xFD) this.writeInt(val, 1)
+     },
+    getValue: function() { return buf }
+  }
+}
+
 const Hash = {
   sha256  : function (hexstr) { return crypto.createHash('sha256').update(new Buffer(hexstr, 'hex')).digest('hex') }, // shorthand
   sha1    : function (hexstr) { return crypto.createHash('sha1').update(new Buffer(hexstr, 'hex')).digest('hex') }, // shorthand
@@ -197,5 +216,5 @@ const Hash = {
 
 
 
-module.exports = {opcodes: opcodes, codeops: codeops, Bytes: Bytes, Biterator: Biterator, Hash: Hash}
+module.exports = {opcodes: opcodes, codeops: codeops, Bytes: Bytes, Biterator: Biterator, Bitwriter: Bitwriter, Hash: Hash}
   
