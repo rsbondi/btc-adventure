@@ -61,7 +61,7 @@ module.exports = {
       OP_OR:                  function() { throw('disabled') },
       OP_XOR:                 function() { throw('disabled') },
       OP_EQUAL:               function() { const b = stack.pop(); const a = stack.pop(); stack.push(a+'' == b+'' ? 1 : 0) },
-      OP_EQUALVERIFY:         function() {},                                                          // Same as OP_EQUAL, but runs OP_VERIFY afterward.
+      OP_EQUALVERIFY:         function() { this.OP_EQUAL(); this.OP_VERIFY() },
       OP_RESERVED1:           function() {},                                                          // Transaction is invalid unless occuring in an unexecuted OP_IF branch
       OP_RESERVED2:           function() {},                                                          // Transaction is invalid unless occuring in an unexecuted OP_IF branch
       OP_1ADD:                function() { stack.push(parseInt(stack.pop(), 10) + 1) },
@@ -97,7 +97,7 @@ module.exports = {
       OP_HASH256:             function() { const top = stack.pop(); stack.push(Hash.datahash(top)) },
       OP_CODESEPARATOR:       function() {},                                                          // All of the signature checking words will only match signatures to the data after the most recently-executed OP_CODESEPARATOR.
       OP_CHECKSIG:            function() { const pub = stack.pop(); const sig = stack.pop();  },
-      OP_CHECKSIGVERIFY:      function() {},                                                          // Same as OP_CHECKSIG, but OP_VERIFY is executed afterward. fail if fales
+      OP_CHECKSIGVERIFY:      function() { this.OP_CHECKSIG(); this.OP_VERIFY() },                                                          // Same as OP_CHECKSIG, but OP_VERIFY is executed afterward. fail if fales
       /*
       Compares the first signature against each public key until it finds an ECDSA match. Starting with the subsequent public key, 
       it compares the second signature against each remaining public key until it finds an ECDSA match. 
