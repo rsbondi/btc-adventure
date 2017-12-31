@@ -17,7 +17,9 @@ Execution
 |OP_2|`[1, 2]`|push 2 to stack|
 |OP_ADD|`[3]`|remove 2 from stack<br> remove 1 from stack<br> add them and push result to stack|
 
-## Our approach to interpret a script
+## Interpreting a script
+
+### Basic operations
 
 First we create an `Interpretor` object, with a `stack` variable, which is simply an array.  Within the `Interpretor` we create an `ops` object.  `ops` is a mapping of opcodes to the functions they will perform.
 
@@ -46,3 +48,27 @@ run: function(script) {
 ```
 
 So we basically just point to the `ops` object and call the function mapped to it by `op`
+
+### Conditional operation
+
+Much like many scripting or programming languages, bitcoin scripts can have conditional operations represented by `OP_IF`, `OP_NOTIF`, `OP_ELSE` and `OP_ENDIF`.  The difference here is that being stack based, the condition is evaluated against the top of the stack.  If the item on the top of the stack is non zero, the section following the `OP_IF` is executed, if zero, executioin will branch to `OP_ELSE` or `OP_ENDIF`.  We track this with an array.  An array is used to allow nesting.
+
+```javascript
+let branch = []
+```
+
+and the `branch` array is used like
+
+```javascript
+OP_IF:  function() { branch.unshift(stack.pop() ? 1 : -1) }
+```
+
+When `OP_IF` is called we store the branch status with 2 flags, `1` to evaluate and `-1` to skip.  `unshift` is used here to put the flag to the front of the array for easy access with the zero index (`branch[0]`)
+
+Code is evaluated or not based on the following
+
+```javascript
+const ok = !branch.length || branch[0] > -1 || ~['OP_IF', 'OP_NOTIF', 'OP_ELSE', 'OP_ENDIF'].indexOf(op)
+```
+
+`!branch.length` means the array is empty so no branch consideration.  If the first item of `branch` is `-1` we skip, this will later get set to 1 on `OP_ELSE`.  The last part allows evaluation of the conditional statements
