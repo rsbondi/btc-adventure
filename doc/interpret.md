@@ -72,3 +72,12 @@ const ok = !branch.length || branch[0] > -1 || ~['OP_IF', 'OP_NOTIF', 'OP_ELSE',
 ```
 
 `!branch.length` means the array is empty so no branch consideration.  If the first item of `branch` is `-1` we skip, this will later get set to 1 on `OP_ELSE`.  The last part allows evaluation of the conditional statements
+
+`OP_ELSE` will invert the flag
+
+```javascript
+ OP_ELSE: function() { branch[0] = branch[0] === 1 ? -1 : 1 }
+ ```
+ so if we were evaluating, we now skip and visa versa.
+
+ `OP_ENDIF` will remove the first item with `branch.shift()`
