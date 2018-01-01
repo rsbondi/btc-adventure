@@ -151,9 +151,6 @@ module.exports = {
             if(!isNaN(op)) opnum = parseInt(op, 10)
 
             if(ops[op]) ops[op]()
-            else if(opnum > 1 && opnum < 76) {
-                // push opnum bytes to stack
-            }
             else stack.push(op)
             
             console.log(op, stack)
