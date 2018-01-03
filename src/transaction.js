@@ -107,7 +107,16 @@ const Transaction = {
         writer.write(out.scriptPubKey.hex)
       })
 
-      // witness here?
+      if(hasWitness) {
+        tx.vin.forEach(input => {
+          const nwit = input.txinwitness.length
+          writer.writeVarInt(nwit)
+          input.txinwitness.forEach(wit => {
+            writer.writeVarInt(wit.length)
+            writer.write(wit)
+          })
+        })
+      }
       
       writer.writeInt(tx.locktime, 4)
       
