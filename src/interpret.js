@@ -145,15 +145,12 @@ module.exports = {
       run: function(script) {
         if(typeof script === 'string') script = script.split(' ')
         script.forEach(op => {
-            const ok = !branch.length || branch[0] > -1 || ~['OP_IF', 'OP_ELSE', 'OP_ENDIF'].indexOf(op)
+            const ok = !branch.length || branch[0] > -1 || ~['OP_IF', 'OP_NOTIF', 'OP_ELSE', 'OP_ENDIF'].indexOf(op)
             if(!ok) return
             let opnum = 0
             if(!isNaN(op)) opnum = parseInt(op, 10)
 
             if(ops[op]) ops[op]()
-            else if(opnum > 1 && opnum < 76) {
-                // push opnum bytes to stack
-            }
             else stack.push(op)
             
             console.log(op, stack)

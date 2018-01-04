@@ -3,6 +3,7 @@ const { opcodes, codeops, Bytes } = require('./common')
 module.exports = {
     // static utility
     Script: {
+        // asm opcode string to byte array (can serialize to string Bytes.toHex())
         fromAsm: function(asm) {
           return asm.split(' ').reduce((o,c,i) => { 
             if(typeof opcodes[c]!='undefined') { o.push(opcodes[c]); return o }
@@ -14,6 +15,7 @@ module.exports = {
             }
           },[])
         },
+        // hex script to array of op codes (join for asm string)
         toAsm: function(bytes) {
           if(typeof bytes === 'string') bytes = Bytes.fromHex(bytes)
           var commands = []

@@ -107,12 +107,33 @@ const Transaction = {
         writer.write(out.scriptPubKey.hex)
       })
 
-      // witness here?
+      if(hasWitness) {
+        tx.vin.forEach(input => {
+          const nwit = input.txinwitness.length
+          writer.writeVarInt(nwit)
+          input.txinwitness.forEach(wit => {
+            writer.writeVarInt(wit.length)
+            writer.write(wit)
+          })
+        })
+      }
       
       writer.writeInt(tx.locktime, 4)
       
       return writer.getValue()
-    }
+    },
+    create: function(tx) {
+        // create standard transaction
+        // create inputs with no script, add script when signing
+        // output scriptPubKey = OP_DUP OP_HASH160 <pub key hash> OP_EQUALVERIFY OP_CHECKSIG
+        // the output scriptPubKey seems to depend on where you send, P2SH (multisig) = OP_HASH160 <script hash> OP_EQUAL
+        // signature from rpc = createrawtransaction [{"txid":"id","vout":n},...] {"address":amount,"data":"hex",...} ( locktime ) ( replaceable )
+        // "data" in above is OP_RETURN, ignore for now
+    },
+    // createmultisig nrequired ["key",...]
+    createMulti: function(nrequired, keys) {
+
+    } 
 }
 
 
