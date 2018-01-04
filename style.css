@@ -1,0 +1,56 @@
+/* Styles go here */
+
+textarea {
+  width: 100%;
+  height: 200px;
+}
+
+pre {
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  padding: 10px;
+}
+
+.version {
+  color: red;
+}
+
+.marker {
+  color: purple;
+}
+
+.flag {
+  color: blue;
+}
+
+.nin {
+  color: green;
+}
+
+.txid {
+  color: orange;
+}
+
+.vout {
+  color: magenta;
+}
+
+.script {
+  color: gray;
+}
+
+.outval {
+  color: blue;
+}
+
+.outscript {
+  color: purple;
+}
+
+.win {
+  color: cornflowerblue;
+}
+
+.wit {
+  color: darkgray;
+}
