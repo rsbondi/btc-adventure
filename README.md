@@ -9,6 +9,9 @@ There are plenty of battle tested libraries out there, so the objective is not t
 
 Thank you for taking the time to share in the journey with me and I hope you and I can work together on creating a brighter future.
 
+To begin the adventure, it is recommended that you have basic familiarity with the bitcoin api, you can use the bitcoind/bitcoin-cli
+or [chainquery](https://chainquery.com/bitcoin-api).  This will be useful for example, retrieving a raw transaction for parsing.
+
 # Table of contents
 Section Name | Text | Code
 -------------| ---- | ----

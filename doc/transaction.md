@@ -43,6 +43,8 @@ The `Biterator` object is initialized with a byte array, stored internally in `b
 
 ## Parsing raw transaction
 
+To get an understanding of the pieces of a raw transaction, take a look [here](https://rsbondi.github.io/btc-adventure/)
+
 The `Transaction` object handles parsing via static member `parseRaw` with the signature of `parseRaw: function(rawtx)` where the `rawtx` parameter is the raw transaction hex string.  It will return an object representing the transaction with the following representation
 
 ```javascript
