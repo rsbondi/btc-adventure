@@ -1,8 +1,8 @@
-const pre = document.querySelector('pre')
-const ta = document.querySelector('textarea')
-const btn = document.querySelector('button')
+var pre = document.querySelector('pre')
+var ta = document.querySelector('textarea')
+var btn = document.querySelector('button')
 
-const opcodes = { // copy paste from https://github.com/bcoin-org/bcoin/blob/master/lib/script/common.js
+var opcodes = { // copy paste from https://github.com/bcoin-org/bcoin/blob/master/lib/script/common.js
   // Push
   OP_0: 0x00,
 
@@ -139,28 +139,28 @@ const opcodes = { // copy paste from https://github.com/bcoin-org/bcoin/blob/mas
 };
 
 // this allows you to get code name from hex value
-const codeops = Object.keys(opcodes).reduce((o, k) => {
+var codeops = Object.keys(opcodes).reduce(function(o, k) {
   o[opcodes[k]] = k; return o;
 }, {})
 
-const Bytes = {
+var Bytes = {
   fromHex: function (bytes) {
-    return bytes.split('').reduce((o, c, i) => {
+    return bytes.split('').reduce(function(o, c, i) {
       if (i % 2 === 0) o.push(c)
       else o[o.length - 1] += c
       return o
-    }, []).map(b => parseInt(b, 16))
+    }, []).map(function(b) { return parseInt(b, 16) })
   },
   toHex: function (bytes) {
-    return bytes.reduce((o, c) => { return o += ('0' + (c & 0xFF).toString(16)).slice(-2) }, '')
+    return bytes.reduce(function(o, c) { return o += ('0' + (c & 0xFF).toString(16)).slice(-2) }, '')
   },
   reverseHex: function (hex) { return Bytes.toHex(Bytes.fromHex(hex).reverse()) }
 }
 
-const Script = {
+var Script = {
   // asm opcode string to byte array (can serialize to string Bytes.toHex())
   fromAsm: function (asm) {
-    return asm.split(' ').reduce((o, c, i) => {
+    return asm.split(' ').reduce(function(o, c, i) {
       if (typeof opcodes[c] != 'undefined') { o.push(opcodes[c]); return o }
       else {
         var bytes = Bytes.fromHex(c)
@@ -219,7 +219,7 @@ function Biterator(bytes) {
     readVarInt: function () {
       var byte = this.readBytes(1)[0]
       if (byte < 0xFD) return byte
-      else this.readInt(2 * (byte - 0xFC))
+      else return this.readInt(2 * (byte - 0xFC))
     },
     getRemaining: function () {
       return buf.slice(index)
@@ -229,30 +229,30 @@ function Biterator(bytes) {
 }
 
 function addSpan(cls, title, hex) {
-  let span = document.createElement('span')
+  var span = document.createElement('span')
   span.className = cls
   span.title = title
   span.innerHTML = hex
   pre.appendChild(span)
 }
 
-const Transaction = {
+var Transaction = {
   parseRaw: function (rawtx) {
-    let tx = {
+    var tx = {
       version: 1,
       locktime: 0,
       vin: [],
       vout: []
     }
 
-    const reader = new Biterator(Bytes.fromHex(rawtx))
+    var reader = new Biterator(Bytes.fromHex(rawtx))
     pre.innerHTML = ''
 
     tx.version = reader.readInt(4)
     addSpan('version', `version=${tx.version} (little endian)`, reader.getHex())
 
-    let hasWitness = false
-    let incount = reader.readVarInt()
+    var hasWitness = false
+    var incount = reader.readVarInt()
     if (incount === 0x00) {
       addSpan('marker', 'marker 00', '00')
       hasWitness = reader.readInt(1) === 0x01
@@ -262,23 +262,23 @@ const Transaction = {
 
     addSpan('nin', `number of inputs = ${incount}`, reader.getHex())
 
-    for (let i = 0; i < incount; i++) {
-      const txid = Bytes.toHex(reader.readBytes(32).slice(0).reverse())
+    for (var i = 0; i < incount; i++) {
+      var txid = Bytes.toHex(reader.readBytes(32).slice(0).reverse())
       addSpan('txid', `input ${i} txid = ${txid} (little endian)`, reader.getHex())
 
-      const vout = reader.readInt(4)
+      var vout = reader.readInt(4)
       addSpan('vout', `input ${i} previous tx output index = ${vout} (little endian)`, reader.getHex())
 
-      const nbytes = reader.readVarInt()
+      var nbytes = reader.readVarInt()
       addSpan('nin', `input ${i} script byte length = ${nbytes}`, reader.getHex())
-      const scriptbytes = reader.readBytes(nbytes)
+      var scriptbytes = reader.readBytes(nbytes)
 
-      const hex = Bytes.toHex(scriptbytes)
-      const asm = Script.toAsm(scriptbytes).join(' ')
+      var hex = Bytes.toHex(scriptbytes)
+      var asm = Script.toAsm(scriptbytes).join(' ')
       console.log(hex)
       addSpan('script', `input ${i} script = ${hex}`, reader.getHex())
 
-      const sequence = reader.readInt(4)
+      var sequence = reader.readInt(4)
       addSpan('sequence', `input ${i} sequence = ${sequence}`, reader.getHex())
 
       tx.vin.push({
@@ -291,20 +291,20 @@ const Transaction = {
         sequence: sequence
       })
     }
-    const nout = reader.readVarInt()
+    var nout = reader.readVarInt()
     addSpan('nin', `number of outputs = ${nout}`, reader.getHex())
 
-    for (let i = 0; i < nout; i++) {
-      let out = {
+    for (var i = 0; i < nout; i++) {
+      var out = {
         value: reader.readInt(8) / 100000000,
         n: i
       }
       addSpan('outval', `output ${i} value = ${out.value} (little endian)`, reader.getHex())
 
-      const nobytes = reader.readVarInt()
+      var nobytes = reader.readVarInt()
       addSpan('nin', `output ${i} script byte length = ${nobytes}`, reader.getHex())
 
-      const scriptbytes = reader.readBytes(nobytes)
+      var scriptbytes = reader.readBytes(nobytes)
       out.scriptPubKey = {
         asm: Script.toAsm(scriptbytes).join(' '),
         hex: Bytes.toHex(scriptbytes)
@@ -312,18 +312,18 @@ const Transaction = {
       addSpan('outscript', `output ${i} script = ${out.scriptPubKey.asm}`, reader.getHex())
       tx.vout.push(out)
     }
-    let witnessStart = 0
-    let witnessSize = 0
+    var witnessStart = 0
+    var witnessSize = 0
     if (hasWitness) {
       witnessStart = reader.getIndex()
       witnessSize = witnessStart + 2 // +lock time - marker - flag
-      for (let i = 0; i < incount; i++) {
-        const len = reader.readVarInt()
+      for (var i = 0; i < incount; i++) {
+        var len = reader.readVarInt()
         addSpan('nin', `input ${i} witness data count = ${len}`, reader.getHex())
 
         tx.vin[i].txinwitness = []
-        for (let w = 0; w < len; w++) {
-          const wlen = reader.readVarInt()
+        for (var w = 0; w < len; w++) {
+          var wlen = reader.readVarInt()
           addSpan('win', `input ${i}, witness ${w} length = ${wlen}`, reader.getHex())
           tx.vin[i].txinwitness.push(Bytes.toHex(reader.readBytes(wlen)))
           addSpan('wit', `input ${i}, witness ${w} data`, reader.getHex())
@@ -337,4 +337,4 @@ const Transaction = {
 
 }
 
-btn.addEventListener('click', e => Transaction.parseRaw(ta.value))
+btn.addEventListener('click', function(e) { Transaction.parseRaw(ta.value) })
