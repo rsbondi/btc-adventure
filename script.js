@@ -1,3 +1,4 @@
+// TODO: remove template strings
 var pre = document.querySelector('pre')
 var ta = document.querySelector('textarea')
 var btn = document.querySelector('button')
@@ -194,7 +195,16 @@ var Script = {
       else throw ('unknown opcode' + byte + ' ' + b)
     }
     return commands
+  },
+  fromSig: function (bytes) {
+    if (typeof bytes === 'string') bytes = Bytes.fromHex(bytes)
+    var siglen = bytes[0]
+    var sig = bytes.slice(2, siglen)
+    var type = bytes.slice(siglen, siglen + 1)
+    var key = bytes.slice(siglen + 2) // skip length byte, we get the rest form here
+    return [Bytes.toHex(sig), Bytes.toHex(type), Bytes.toHex(key)]
   }
+
 }
 
 function Biterator(bytes) {
@@ -275,8 +285,17 @@ var Transaction = {
 
       var hex = Bytes.toHex(scriptbytes)
       var asm = Script.toAsm(scriptbytes).join(' ')
-      console.log(hex)
-      addSpan('script', `input ${i} script = ${hex}`, reader.getHex())
+
+      var sigscript = Script.fromSig(scriptbytes)
+      var siglen = scriptbytes.slice(0, 1)
+      addSpan('version', `input ${i} sig length = ${siglen}`, Bytes.toHex(siglen))
+      addSpan('script', `input ${i} signature`, sigscript[0])
+      addSpan('version', `input ${i} signature type`, sigscript[1])
+
+
+      var publen = scriptbytes.slice(siglen[0] + 1, siglen[0] + 2)
+      addSpan('nin', `input ${i} pub key length = ${publen}`, Bytes.toHex(publen))
+      addSpan('script', `input ${i} pub key`, sigscript[2])
 
       var sequence = reader.readInt(4)
       addSpan('sequence', `input ${i} sequence = ${sequence}`, reader.getHex())
