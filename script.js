@@ -1,4 +1,3 @@
-// TODO: remove template strings
 var pre = document.querySelector('pre')
 var ta = document.querySelector('textarea')
 var btn = document.querySelector('button')
@@ -202,6 +201,10 @@ var Script = {
     var sig = bytes.slice(2, siglen)
     var type = bytes.slice(siglen, siglen + 1)
     var key = bytes.slice(siglen + 2) // skip length byte, we get the rest form here
+    if (!key.length) {
+      sig = sig.concat(type)
+      type = []
+    }
     return [Bytes.toHex(sig), Bytes.toHex(type), Bytes.toHex(key)]
   }
 
@@ -259,7 +262,7 @@ var Transaction = {
     pre.innerHTML = ''
 
     tx.version = reader.readInt(4)
-    addSpan('version', `version=${tx.version} (little endian)`, reader.getHex())
+    addSpan('version', 'version=' + tx.version + ' (little endian)', reader.getHex())
 
     var hasWitness = false
     var incount = reader.readVarInt()
@@ -270,17 +273,17 @@ var Transaction = {
       incount = reader.readVarInt()
     }
 
-    addSpan('nin', `number of inputs = ${incount}`, reader.getHex())
+    addSpan('nin', 'number of inputs = ' + incount, reader.getHex())
 
     for (var i = 0; i < incount; i++) {
       var txid = Bytes.toHex(reader.readBytes(32).slice(0).reverse())
-      addSpan('txid', `input ${i} txid = ${txid} (little endian)`, reader.getHex())
+      addSpan('txid', 'input ' + i + ' txid = ' + txid + ' (little endian)', reader.getHex())
 
       var vout = reader.readInt(4)
-      addSpan('vout', `input ${i} previous tx output index = ${vout} (little endian)`, reader.getHex())
+      addSpan('vout', 'input ' + i + ' previous tx output index = ' + vout + ' (little endian)', reader.getHex())
 
       var nbytes = reader.readVarInt()
-      addSpan('nin', `input ${i} script byte length = ${nbytes}`, reader.getHex())
+      addSpan('nin', 'input ' + i + ' script byte length = ' + nbytes, reader.getHex())
       var scriptbytes = reader.readBytes(nbytes)
 
       var hex = Bytes.toHex(scriptbytes)
@@ -288,20 +291,20 @@ var Transaction = {
 
       var sigscript = Script.fromSig(scriptbytes)
       var siglen = scriptbytes.slice(0, 1)
-      addSpan('version', `input ${i} sig length = ${siglen}`, Bytes.toHex(siglen))
-      addSpan('script', `input ${i} signature`, sigscript[0])
-      addSpan('version', `input ${i} signature type`, sigscript[1])
+      addSpan('version', 'input ' + i + (sigscript[2] ? ' sig length = ' : ' hash length = ') + siglen, Bytes.toHex(siglen))
+      addSpan('script', 'input ' + i + (sigscript[2] ? ' signature' : ' scriptSig (hash)'), sigscript[0])
+      addSpan('version', 'input ' + i + ' signature type', sigscript[1])
 
 
       var publen = scriptbytes.slice(siglen[0] + 1, siglen[0] + 2)
-      addSpan('nin', `input ${i} pub key length = ${publen}`, Bytes.toHex(publen))
-      addSpan('script', `input ${i} pub key`, sigscript[2])
+      addSpan('nin', 'input ' + i + ' pub key length = ' + publen, Bytes.toHex(publen))
+      addSpan('script', 'input ' + i + ' pub key', sigscript[2])
 
       var sequence = reader.readInt(4)
-      addSpan('sequence', `input ${i} sequence = ${sequence}`, reader.getHex())
+      addSpan('sequence', 'input ' + i + ' sequence = ' + sequence, reader.getHex())
 
       tx.vin.push({
-        txid: txid, // little endian
+        txid: txid,
         vout: vout,
         scriptSig: {
           asm: asm,
@@ -311,24 +314,24 @@ var Transaction = {
       })
     }
     var nout = reader.readVarInt()
-    addSpan('nin', `number of outputs = ${nout}`, reader.getHex())
+    addSpan('nin', 'number of outputs = ' + nout, reader.getHex())
 
     for (var i = 0; i < nout; i++) {
       var out = {
         value: reader.readInt(8) / 100000000,
         n: i
       }
-      addSpan('outval', `output ${i} value = ${out.value} (little endian)`, reader.getHex())
+      addSpan('outval', 'output ' + i + ' value = ' + out.value + ' (little endian)', reader.getHex())
 
       var nobytes = reader.readVarInt()
-      addSpan('nin', `output ${i} script byte length = ${nobytes}`, reader.getHex())
+      addSpan('nin', 'output ' + i + ' script byte length = ' + nobytes, reader.getHex())
 
       var scriptbytes = reader.readBytes(nobytes)
       out.scriptPubKey = {
         asm: Script.toAsm(scriptbytes).join(' '),
         hex: Bytes.toHex(scriptbytes)
       }
-      addSpan('outscript', `output ${i} script = ${out.scriptPubKey.asm}`, reader.getHex())
+      addSpan('outscript', 'output ' + i + ' script = ' + out.scriptPubKey.asm, reader.getHex())
       tx.vout.push(out)
     }
     var witnessStart = 0
@@ -338,20 +341,20 @@ var Transaction = {
       witnessSize = witnessStart + 2 // +lock time - marker - flag
       for (var i = 0; i < incount; i++) {
         var len = reader.readVarInt()
-        addSpan('nin', `input ${i} witness data count = ${len}`, reader.getHex())
+        addSpan('nin', 'input ' + i + ' witness data count = ' + len, reader.getHex())
 
         tx.vin[i].txinwitness = []
         for (var w = 0; w < len; w++) {
           var wlen = reader.readVarInt()
-          addSpan('win', `input ${i}, witness ${w} length = ${wlen}`, reader.getHex())
+          addSpan('win', 'input ' + i + ', witness ' + w + ' length = ' + wlen, reader.getHex())
           tx.vin[i].txinwitness.push(Bytes.toHex(reader.readBytes(wlen)))
-          addSpan('wit', `input ${i}, witness ${w} data`, reader.getHex())
+          addSpan('wit', 'input ' + i + ', witness ' + w + ' data', reader.getHex())
         }
       }
     }
 
     tx.locktime = reader.readInt(4)
-    addSpan('version', `locktime = ${tx.locktime}`, reader.getHex())
+    addSpan('version', 'locktime = ' + tx.locktime, reader.getHex())
   }
 
 }
