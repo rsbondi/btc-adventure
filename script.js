@@ -198,7 +198,7 @@ var Script = {
   fromSig: function (bytes) {
     if (typeof bytes === 'string') bytes = Bytes.fromHex(bytes)
     var siglen = bytes[0]
-    var sig = bytes.slice(2, siglen)
+    var sig = bytes.slice(1, siglen)
     var type = bytes.slice(siglen, siglen + 1)
     var key = bytes.slice(siglen + 2) // skip length byte, we get the rest form here
     if (!key.length) {
