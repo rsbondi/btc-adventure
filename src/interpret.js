@@ -93,8 +93,8 @@ module.exports = {
       OP_WITHIN:              function() { const b = parseInt(stack.pop(), 10); const a = parseInt(stack.pop(), 10); const x = parseInt(stack.pop(), 10); stack.push(x >= a && x < b? 1 : 0) },
       OP_RIPEMD160:           function() { stack.push(Hash.rmd160(stack.pop())) },
       OP_SHA1:                function() { stack.push(Hash.sha1(stack.pop())) },
-      OP_HASH160:             function() { const top = stack.pop(); stack.push(Hash.pubhash(top)) },
-      OP_HASH256:             function() { const top = stack.pop(); stack.push(Hash.datahash(top)) },
+      OP_HASH160:             function() { const top = stack.pop(); stack.push(Hash.hash160(top)) },
+      OP_HASH256:             function() { const top = stack.pop(); stack.push(Hash.dhash(top)) },
       OP_CODESEPARATOR:       function() {},                                                          // All of the signature checking words will only match signatures to the data after the most recently-executed OP_CODESEPARATOR.
       OP_CHECKSIG:            function() { const pub = stack.pop(); const sig = stack.pop();  },
       OP_CHECKSIGVERIFY:      function() { this.OP_CHECKSIG(); this.OP_VERIFY() },                                                          // Same as OP_CHECKSIG, but OP_VERIFY is executed afterward. fail if fales

@@ -224,8 +224,8 @@ tx.vsize = hasWitness ? Math.ceil((witnessSize*3+tx.size) / 4) : tx.size
 const noseg = hasWitness ? rawtx.slice(0, 8) +
   rawtx.slice(12, witnessStart * 2) +
   rawtx.slice(tx.size * 2 - 8, tx.size * 2) : ''
-const txhash = Bytes.reverseHex(Hash.datahash(rawtx.slice(0,tx.size*2)))
-tx.txid = hasWitness ? Bytes.reverseHex(Hash.datahash(noseg))
+const txhash = Bytes.reverseHex(Hash.dhash(rawtx.slice(0,tx.size*2)))
+tx.txid = hasWitness ? Bytes.reverseHex(Hash.dhash(noseg))
   : txhash
 tx.hash = txhash
 ```
@@ -242,7 +242,7 @@ The hash and txid are calculate through wrapper functions in [common.js](../src/
 const Hash = {
   sha256: function(hexstr) { return crypto.createHash('sha256').update(new Buffer(hexstr, 'hex')).digest('hex') }, 
   rmd160: function(hexstr) { return new ripemd160().update(new Buffer(hexstr, 'hex')).digest('hex') },  
-  datahash: function (data) { return Hash.sha256(Hash.sha256(data)) }, 
-  pubhash: function (data) { return Hash.rmd160(Hash.sha256(data)) } 
+  dhash: function (data) { return Hash.sha256(Hash.sha256(data)) }, 
+  hash160: function (data) { return Hash.rmd160(Hash.sha256(data)) } 
 }
 ```

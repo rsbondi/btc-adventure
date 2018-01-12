@@ -210,8 +210,8 @@ const Hash = {
   sha256  : function (hexstr) { return crypto.createHash('sha256').update(new Buffer(hexstr, 'hex')).digest('hex') }, // shorthand
   sha1    : function (hexstr) { return crypto.createHash('sha1').update(new Buffer(hexstr, 'hex')).digest('hex') }, // shorthand
   rmd160  : function(hexstr) { return new ripemd160().update(new Buffer(hexstr, 'hex')).digest('hex') },  // shorthand
-  datahash: function (data) { return Hash.sha256(Hash.sha256(data)) }, // txid is revers of this
-  pubhash : function (data) { return Hash.rmd160(Hash.sha256(data)) } // P2PKH hexstr = public key  
+  dhash   : function (data) { return Hash.sha256(Hash.sha256(data)) }, // txid is revers of this
+  hash160 : function (data) { return Hash.rmd160(Hash.sha256(data)) } // P2PKH hexstr = public key  
 }
 
 

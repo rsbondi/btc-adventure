@@ -76,8 +76,8 @@ const Transaction = {
         rawtx.slice(tx.size * 2 - 8, tx.size * 2) : ''
       // the previous and following lines limit to the calculated size of the transaction, 
       // since in the block thay are concatenated and we don't know until we get here
-      const txhash = Bytes.reverseHex(Hash.datahash(rawtx.slice(0,tx.size*2)))
-      tx.txid = hasWitness ? Bytes.reverseHex(Hash.datahash(noseg))
+      const txhash = Bytes.reverseHex(Hash.dhash(rawtx.slice(0,tx.size*2)))
+      tx.txid = hasWitness ? Bytes.reverseHex(Hash.dhash(noseg))
         : txhash
       tx.hash = txhash
 
