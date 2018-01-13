@@ -27,12 +27,11 @@ const Block = {
         }
         return {header: header, transactions: txs, rawtxs: rawtxs} 
     },
-    calcMerkleRoot(txs) {
+    calcMerkleRoot: function(txs) {
         function processRow(row) {
             if (row.length % 2) row.push(row[row.length - 1])
             let newrow = []
             for(let start = 0, end = 2; start < row.length; start+=2, end+=2 ) {
-                console.log('hashing', row.slice(start, end).map(h => Bytes.reverseHex(h)).join(''))
                 newrow.push(Bytes.reverseHex(Hash.dhash(row.slice(start, end).map(h => Bytes.reverseHex(h)).join(''))))
             }
             return newrow

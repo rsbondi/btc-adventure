@@ -38,6 +38,8 @@ parseRaw: function(blockstr) {
 
 The above is just applying what we learned in previous sections to the definition in the table
 
+## Block Transactions
+
 ### Transaction parsing
 
 ```javascript
@@ -56,3 +58,44 @@ The above is just applying what we learned in previous sections to the definitio
 After the header are all transactions included in the block.  The number of transactions is read as a `varInt`
 
 The transactions are raw one following the other.  By parsing a transaction as in the previous section, our iterator will leave us with the count representing the size of the transaction in bytes.  Since we are passing a string at this point, we pass the remaining string and when we get to the end, we slice off the transaction size of the string * 2 for the size of each hex byte of the string.  We start by reading the number of transactions as already mentioned.  We get remaining unread bytes from the buffer and convert back to a string for parsing, slicing off each transaction once parsed.
+
+## Merkle Root
+
+The merkle root is determined by hashing concatenated pairs of hashes recursively until a single hash remains.  See [Mastering Bitcoin](http://chimera.labs.oreilly.com/books/1234000001802/ch07.html#merkle_trees) and [Bitcoin Wiki](https://en.bitcoin.it/wiki/Protocol_documentation#Merkle_Trees) for details
+
+### Calculating
+
+```javascript
+calcMerkleRoot: function(txs) {
+    function processRow(row) {
+        if (row.length % 2) row.push(row[row.length - 1])
+        let newrow = []
+        for(let start = 0, end = 2; start < row.length; start+=2, end+=2 ) {
+            newrow.push(Bytes.reverseHex(Hash.dhash(row.slice(start, end).map(h => Bytes.reverseHex(h)).join(''))))
+        }
+        return newrow
+    }
+    let row = txs
+    while(row.length > 1) row = processRow(row)
+    return row[0]
+}
+```
+
+Each row must contain an even number of hashes to hash in pairs.  This is checked with:
+
+`if (row.length % 2) row.push(row[row.length - 1])`
+
+This pushes the last item in the rows to even it out
+
+We then loop through one row at a time and hash the concatenation of the pair to create the next row up in the tree
+
+`row.slice(start, end)`
+
+gives the pair of hashes, they are reversed here due to the hashing library chosen, hence the need for mapping here, see note on last line of the section in the wiki linked above, `.join('')` does the concatenation before hashing
+
+We call this process repeatedly until only one item remains, that is our merkle root
+
+```javascript
+while(row.length > 1) row = processRow(row)
+return row[0]
+```
