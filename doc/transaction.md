@@ -246,3 +246,5 @@ const Hash = {
   hash160: function (data) { return Hash.rmd160(Hash.sha256(data)) } 
 }
 ```
+
+_it is important to note that hashing is done on the binary data, these wrappers allow using a hex string, `new Buffer(hexstr, 'hex')` the `'hex'` is important here otherwise you would be hashing the string and not the binary data.  For example in the psuedo code `hash('hello')` is valid but has no meaning in hex, so hashing `hash('ab1234')` without the content type hex is valid but meaningless for our purpose_
