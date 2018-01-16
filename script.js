@@ -232,7 +232,11 @@ function Biterator(bytes) {
     readVarInt: function () {
       var byte = this.readBytes(1)[0]
       if (byte < 0xFD) return byte
-      else return this.readInt(2 * (byte - 0xFC))
+      else {
+        var ret = this.readInt(2 * (byte - 0xFC))
+        hex = [byte].concat(hex)
+        return ret
+      }
     },
     getRemaining: function () {
       return buf.slice(index)
