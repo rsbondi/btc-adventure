@@ -191,13 +191,14 @@ var Script = {
         continue
       }
       if (codeops[byte]) commands.push(codeops[byte])
-      else throw ('unknown opcode' + byte + ' ' + b)
+      console.log('unknown opcode ' + byte + ' ' + b)
     }
     return commands
   },
   fromSig: function (bytes) {
     if (typeof bytes === 'string') bytes = Bytes.fromHex(bytes)
     var siglen = bytes[0]
+    if (!siglen) return [Bytes.toHex(bytes), '', '']
     var sig = bytes.slice(1, siglen)
     var type = bytes.slice(siglen, siglen + 1)
     var key = bytes.slice(siglen + 2) // skip length byte, we get the rest form here
@@ -295,7 +296,7 @@ var Transaction = {
 
       var sigscript = Script.fromSig(scriptbytes)
       var siglen = scriptbytes.slice(0, 1)
-      addSpan('version', 'input ' + i + (sigscript[2] ? ' sig length = ' : ' script length = ') + siglen, Bytes.toHex(siglen))
+      if (sigscript[1]) addSpan('version', 'input ' + i + (sigscript[2] ? ' sig length = ' : ' script length = ') + siglen, Bytes.toHex(siglen))
       addSpan('script', 'input ' + i + (sigscript[2] ? ' signature' : ' redeemScript'), sigscript[0])
       addSpan('version', 'input ' + i + ' signature type', sigscript[1])
 
