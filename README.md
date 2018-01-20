@@ -12,12 +12,16 @@ Thank you for taking the time to share in the journey with me and I hope you and
 To begin the adventure, it is recommended that you have basic familiarity with the bitcoin api, you can use the bitcoind/bitcoin-cli
 or [chainquery](https://chainquery.com/bitcoin-api).  This will be useful for example, retrieving a raw transaction for parsing.
 
+This is a work in progress and nothing should be taken, much is being developed as I learn so there expect gaps in all sections for now, any comments
+to improve the accuracy of the matierial are welcome.
+
 # Table of contents
 Section Name | Text | Code
 -------------| ---- | ----
 Parsing raw bitcoin script | [read](./doc/script.md) | [script.js](./src/script.js) / [common.js](./src/common.js)
 Parsing raw bitcoin transaction | [read](./doc/transaction.md) | [transaction.js](./src/transaction.js)
 Parsing raw block | [read](./doc/block.md) | [block.js](./src/block.js)
-Building raw transaction [WIP] | [read](./doc/createrawtx.md) | [transaction.js](./src/transaction.js)
-Interpreting a script [WIP] | [read](./doc/interpret.md) | [interpret.js](./src/interpret.js)
+Building raw transaction | [read](./doc/createrawtx.md) | [transaction.js](./src/transaction.js)
+Interpreting a script | [read](./doc/interpret.md) | [interpret.js](./src/interpret.js)
+Communicating with peers | [read](./doc/peers.md) | [peers.js](./src/peers.js)
 
