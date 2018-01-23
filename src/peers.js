@@ -1,6 +1,7 @@
 // this is a hard coded mess for now, to be cleaned up and expanded upon
 
 const { Bitwriter, Bytes, Hash, Biterator } = require('./common.js')
+const { Transaction }  = require('./transaction.js')
 
 // const magic = Bytes.toHex([0xda, 0x85, 0xbf, 0xab]) // regtest
 const magic = Bytes.toHex([0x0B, 0x11, 0x09, 0x07]) // testnet
@@ -88,8 +89,46 @@ const handlers = {
             console.log('address info:', addr, port)
         }
     },
-    inv: function() {
+    inv: function(list) {
+        const invtypes = {ERROR: 0, MSG_TX: 1, MSG_BLOCK: 2, MSG_FILTERED_BLOCK: 3, MSG_CMPCT_BLOCK: 4}
+        const reader = new Biterator(list)
+        const ninv = reader.readVarInt()                          // number of addresses
+        for(i=0; i<1; i++) {
+            const invtype = reader.readInt(4)                     // one of invtypes
+            const hash = Bytes.toHex(reader.readBytes(32))        // hash of block, tx, etc
+            console.log('inv: type, hash', invtype, hash)
+            if(invtype == invtypes.MSG_TX) {
+                const header = createHeader('getdata')
+                
+                const msg = new Bitwriter()
+                msg.writeVarInt(1)
+                msg.writeInt(invtype, 4)
+                msg.write(hash)
+                
+                header.writeInt(msg.getValue().length / 2, 4)
+                header.write(calccheck(msg.getValue()))
+                console.log('getdata', header.getValue()+msg.getValue())
+                clientrequest(header.getValue()+msg.getValue())
+            }
+        }
 
+        // Allows a node to advertise its knowledge of one or more objects. It can be received unsolicited, or in reply to getblocks.
+    },
+    getdata: function() {
+        /*
+        getdata is used in response to inv, to retrieve the content of a specific object, and is usually sent after receiving an inv packet, 
+        after filtering known elements. It can be used to retrieve transactions, but only if they are in the memory pool or relay set - 
+        arbitrary access to transactions in the chain is not allowed to avoid having clients start to depend on nodes having full 
+        transaction indexes (which modern nodes do not).
+        Payload (maximum 50,000 entries, which is just over 1.8 megabytes):
+
+        Field Size	Description	Data type	Comments
+        ?	        count	    var_int	    Number of inventory entries
+        36x?	    inventory	inv_vect[]	Inventory vectors
+        */
+    },
+    tx: function(tx) {
+        console.log(JSON.stringify(Transaction.parseRaw(tx) , null, 2))
     }
 }
 
@@ -115,6 +154,7 @@ function clientrequest(request) {
                 console.log('command', cmd)
                 commands.push(cmd)
                 if(~Object.keys(handlers).indexOf(cmd)) handlers[cmd](cmddata)
+                else console.log('not yet implemented', cmd, cmddata)
             }
         })
     });
@@ -123,7 +163,7 @@ function clientrequest(request) {
         console.log('end')
     });
     client.on('error', (err) => {
-            console.log('error', err)
+        console.log('error', err)
     });
     const buff = new Buffer(request, 'hex')
     client.write(buff);       
