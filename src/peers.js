@@ -3,7 +3,7 @@
 const { Bitwriter, Bytes, Hash, Biterator } = require('./common.js')
 const { Transaction }  = require('./transaction.js')
 
-// const magic = Bytes.toHex([0xda, 0x85, 0xbf, 0xab]) // regtest
+// const magic = Bytes.toHex([0xfa, 0xbf, 0xb5, 0xda]) // regtest
 const magic = Bytes.toHex([0x0B, 0x11, 0x09, 0x07]) // testnet
 
 // const port = 18444 // regtest
