@@ -132,42 +132,45 @@ const handlers = {
     }
 }
 
-function clientrequest(request) {
-    let some = ''
-    let commands = []
-    client.on('data', function (response) {
-        some+=response
-        some.split(magic).forEach(r => {
-            if(r.length < 32) return
-            const reader = new Biterator(r)
-            const command = reader.readBytes(12)
-            let cmd = command.reduce((o,c) => {
-                if(c) o += String.fromCharCode(c)
-                return o
-            }, '')
-            const len = reader.readInt(4)
-            const check = reader.readBytes(4) // TODO: verify for integrety
-            const rest = reader.getRemaining()
-
-            if(len == rest.length && !~commands.indexOf(cmd)) {
-                cmddata = Bytes.toHex(rest)
-                console.log('command', cmd)
-                commands.push(cmd)
-                if(~Object.keys(handlers).indexOf(cmd)) handlers[cmd](cmddata)
-                else console.log('not yet implemented', cmd, cmddata)
-            }
-        })
-    });
-        
-    client.on('end', () => {
-        console.log('end')
-    });
-    client.on('error', (err) => {
-        console.log('error', err)
-    });
+function clientrequest(request) {    
     const buff = new Buffer(request, 'hex')
     client.write(buff);       
 }
+
+let some = ''
+function datalistener(response) {
+    some+=response
+    const somes = some.split(magic)
+    console.log('somes', somes)
+    somes.forEach((r, i) => {
+        console.log('some', r, i)
+        if(r.length < 32) return
+        const reader = new Biterator(r)
+        const command = reader.readBytes(12)
+        let cmd = command.reduce((o,c) => {
+            if(c) o += String.fromCharCode(c)
+            return o
+        }, '')
+        const len = reader.readInt(4)
+        const check = reader.readBytes(4) // TODO: varify for integrety
+        const rest = reader.getRemaining()
+
+        if(len == rest.length) {
+            cmddata = Bytes.toHex(rest)
+            if(~Object.keys(handlers).indexOf(cmd)) handlers[cmd](cmddata)
+            else console.log('not yet implemented', cmd, cmddata)
+            some = somes.slice(i+1).join(magic)
+        }
+    })
+}
+client.on('data', datalistener);
+
+client.on('end', () => {
+    console.log('end')
+});
+client.on('error', (err) => {
+        console.log('error', err)
+});
 
 function connect() {
     client.connect(port, peer, function() {
