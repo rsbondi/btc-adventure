@@ -63,10 +63,10 @@ Note again 2 characters per byte so we slice 8 to get the 4 bytes required for t
 
 ```javascript
 let some = ''
-let commands = []
-client.on('data', function (response) {
+function datalistener(response) {
     some+=response
-    some.split(magic).forEach(r => {
+    const somes = some.split(magic)
+    somes.forEach((r, i) => {
         if(r.length < 32) return
         const reader = new Biterator(r)
         const command = reader.readBytes(12)
@@ -75,22 +75,23 @@ client.on('data', function (response) {
             return o
         }, '')
         const len = reader.readInt(4)
-        const check = reader.readBytes(4) // TODO: verify for integrety
+        const check = reader.readBytes(4) // TODO: varify for integrety
         const rest = reader.getRemaining()
 
-        if(len == rest.length && !~commands.indexOf(cmd)) {
+        if(len == rest.length) {
             cmddata = Bytes.toHex(rest)
-            console.log('command', cmd)
-            commands.push(cmd)
             if(~Object.keys(handlers).indexOf(cmd)) handlers[cmd](cmddata)
+            else console.log('not yet implemented', cmd, cmddata)
+            some = somes.slice(i+1).join(magic)
         }
     })
-});
+}
+client.on('data', datalistener);
 ```
 
 Data is not returned in coomplete form and you may recieve multiple responses in the stream.
 
-We handle this by building a string. `some`, and adding to it on each `data` event. We then split by `magic` since there may be multiple commands in the stream.  We know our header is 32 bytes, so if we have 32 bytes for a command as we loop through, we can determin the size(`len`) of the message.  Knowing the size, we know when we have a complete message
+We handle this by building a string. `some`, and adding to it on each `data` event. We then split by `magic` since there may be multiple commands in the stream.  We know our header is 32 bytes, so if we have 32 bytes for a command as we loop through, we can determin the size(`len`) of the message.  Knowing the size, we know when we have a complete message.  Then rebuild `some` removing the completed message.
 
 ```javascript
 if(len == rest.length && !~commands.indexOf(cmd))

@@ -141,9 +141,7 @@ let some = ''
 function datalistener(response) {
     some+=response
     const somes = some.split(magic)
-    console.log('somes', somes)
     somes.forEach((r, i) => {
-        console.log('some', r, i)
         if(r.length < 32) return
         const reader = new Biterator(r)
         const command = reader.readBytes(12)
