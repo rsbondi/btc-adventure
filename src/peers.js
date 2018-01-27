@@ -4,12 +4,15 @@ const { Bitwriter, Bytes, Hash, Biterator } = require('./common.js')
 const { Transaction }  = require('./transaction.js')
 
 // const magic = Bytes.toHex([0xfa, 0xbf, 0xb5, 0xda]) // regtest
+// const magic = Bytes.toHex([0xfd, 0xd2, 0xc8, 0xf1]) // litecoin testnet
 const magic = Bytes.toHex([0x0B, 0x11, 0x09, 0x07]) // testnet
 
 // const port = 18444 // regtest
+// const port = 19335 // litecoin testnet
 const port = 18333 // testnet
 
 const peer = '192.168.0.132'
+const myversion = 70002
 
 function createHeader(command) {
     const header = new Bitwriter()
@@ -25,7 +28,7 @@ function calccheck(data) { return Hash.datahash(data).slice(0, 8) }
    
 const header = createHeader('version')
 const message = new Bitwriter()
-message.write(Bytes.toHex([0x62, 0xEA, 0x00, 0x00]))                          // version
+message.writeInt(myversion, 4)                                                // version
 message.write(Bytes.toHex([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))  // no services
 message.writeInt((new Date()).getTime(), 8)                                   // time
 message.write(Bytes.toHex([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,    // services again
