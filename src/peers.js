@@ -1,7 +1,8 @@
 // this is a hard coded mess for now, to be cleaned up and expanded upon
 
 const { Bitwriter, Bytes, Hash, Biterator } = require('./common.js')
-const { Transaction }  = require('./transaction.js')
+const { Transaction } = require('./transaction.js')
+const { Block } = require('./block.js')
 
 // const magic = Bytes.toHex([0xfa, 0xbf, 0xb5, 0xda]) // regtest
 // const magic = Bytes.toHex([0xfd, 0xd2, 0xc8, 0xf1]) // litecoin testnet
@@ -12,7 +13,9 @@ const magic = Bytes.toHex([0x0B, 0x11, 0x09, 0x07]) // testnet
 const port = 18333 // testnet
 
 const peer = '192.168.0.132'
+const sender = '192.168.0.23'
 const myversion = 70002
+lastblock = 111
 
 function createHeader(command) {
     const header = new Bitwriter()
@@ -35,15 +38,15 @@ message.write(Bytes.toHex([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,    //
                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
                            0x00, 0x00, 0xFF, 0xFF].concat( 
                            peer                                               // recipient address
-                           .split('.').map(m => parseInt(m, 10))).concat(
-                           [0x48, 0x0c                                        // port 18444
-                        ])))
+                           .split('.').map(m => parseInt(m, 10)))))           // this will be 4 bytes from ip
+message.writeInt(port, 2)                                                     // this seems to work with wrong value, see earlier commits
 message.write(Bytes.toHex([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,    // services again
                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-                            0x00, 0x00, 0xFF, 0xFF, 
-                            192 , 168 , 0   , 23  ,                           // sender address
-                            0x48, 0x0c                                        // port 18444
-                         ]))
+                            0x00, 0x00, 0xFF, 0xFF].concat( 
+                            sender                                            // sender address
+                           .split('.').map(m => parseInt(m, 10)))))
+                        
+message.writeInt(port, 2)
 message.write(Bytes.toHex([0xDD, 0x9D, 0x20, 0x2C, 0x3A, 0xB4, 0x57, 0x13]))  // Node random unique ID ???
 const subver = '/bondi:0.0.1/'.split('').reduce((o, c) => {
     o.push(c.charCodeAt(0)); return o},[])                                    // bytes from string
@@ -132,6 +135,9 @@ const handlers = {
     },
     tx: function(tx) {
         console.log(JSON.stringify(Transaction.parseRaw(tx) , null, 2))
+    },
+    block: function (block) {
+        console.log(JSON.stringify(Block.parseRaw(block), null, 2))
     }
 }
 
@@ -143,7 +149,7 @@ function clientrequest(request) {
 let some = ''
 function datalistener(response) {
     some+=response
-    const somes = some.split(magic)
+    const somes = some.split(magic) // maybe recombine for possible magic collision with data, seems to work for demonstration but data could be lost?
     somes.forEach((r, i) => {
         if(r.length < 32) return
         const reader = new Biterator(r)
