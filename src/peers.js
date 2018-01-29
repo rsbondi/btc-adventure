@@ -15,7 +15,7 @@ const port = 18333 // testnet
 const peer = '192.168.0.132'
 const sender = '192.168.0.23'
 const myversion = 70002
-lastblock = 111
+const lastblock = 111
 
 function createHeader(command) {
     const header = new Bitwriter()
