@@ -14,7 +14,7 @@ const port = 18333 // testnet
 
 const peer = '192.168.0.132'
 const sender = '192.168.0.23'
-const myversion = 70002
+const myversion = 70015
 const lastblock = 111
 
 function createHeader(command) {
@@ -138,6 +138,19 @@ const handlers = {
     },
     block: function (block) {
         console.log(JSON.stringify(Block.parseRaw(block), null, 2))
+    },
+    feefilter: function (minfee) {
+        const reader = new Biterator(minfee)
+        console.log('min fee accepted by peer', reader.readInt(8), 'satoshis per byte')
+    },
+    sendcmpct: function (cmpct) {
+        const reader = new Biterator(cmpct)
+        const shouldsend = reader.readInt(1)
+        const cmpctver = reader.readInt(8)
+        console.log('sendcmpct version', cmpctver, `should ${shouldsend ? ' ' : 'not '}send cmpctblock message`)
+    },
+    sendheaders: function (empty) {
+        console.log('sendheaders command, I am permitted, but not required, to announce new blocks by headers command (instead of inv command) BIP-130')
     }
 }
 

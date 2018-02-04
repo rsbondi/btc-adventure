@@ -2,6 +2,8 @@
 
 Peer communication is done via a TCP connection, starting with handshaking.  Before that we need to find a peer to connect to.  I started connecting with my own node, this is recommended if possible.  By using your own node, you can see the results, if you are properly sending your user agent, services, block info, pong response etc.  You can also see the list of peers connected to your node to try connecting to other nodes.  If you don't have a node available, you can connect to a known node.  You can get a list from various dns seeds, these are hard coded into the reference client, and can be found [here](https://github.com/bitcoin/bitcoin/blob/master/src/chainparams.cpp#L128:9).  From a command prompt you can run `nslookup seedaddress` where `seedaddres` is one of the addresses coded in the link above.  This command will give you a list of nodes to try to get started.
 
+*Note the code here is written for ease of viewing how the commands and their responses look on the network and does not go into details on how this is al bootstrapped in an actual node or how the data received from nodes could be used to determine appropriate responses.  See [here](https://en.bitcoin.it/wiki/Bitcoin_Core_0.11_(ch_4):_P2P_Network#Peer_discovery_.26_connectivity) for more details*
+
 ## Handshaking
 
 Handshaking is required to connect to a peer, it starts with the `version` command which tells a node basic info about your client, the node will respond with a `verack` command, short for "version acknowledgement".
