@@ -27,7 +27,7 @@ function createHeader(command) {
     return header
 }
 
-function calccheck(data) { return Hash.datahash(data).slice(0, 8) }
+function calccheck(data) { return Hash.dhash(data).slice(0, 8) }
    
 const header = createHeader('version')
 const message = new Bitwriter()
@@ -56,7 +56,7 @@ message.write(Bytes.toHex(subver))
 message.writeInt(111, 4)                                                      // Last block sending node has is block
 
 header.writeInt(message.getValue().length / 2, 4)
-const check = Hash.datahash(message.getValue()).slice(0, 8)                   // checksum, 4 bytes of string
+const check = Hash.dhash(message.getValue()).slice(0, 8)                   // checksum, 4 bytes of string
 header.write(check)
 
 const request = `${header.getValue()}${message.getValue()}`
