@@ -135,3 +135,5 @@ const handlers = {
 ```
 
 A few simple examples are shown here, the `version` responds with `verack`, it is hard coded since we know the size and checksum since there is no data.  The `ping` responds with `pong` command whose data is the nonce sent with ping command.
+
+To see in action,run `node ./src/peers.js` and watch the terminal logs.
