@@ -2,8 +2,6 @@
 
 Reference code from [block.js](../src/block.js)
 
-
-
 ## Block Header
 A raw block consist of an 80 byte header information and all raw transactions concatenated after the header
 
@@ -99,3 +97,26 @@ We call this process repeatedly until only one item remains, that is our merkle 
 while(row.length > 1) row = processRow(row)
 return row[0]
 ```
+
+## Compact Blocks
+
+The compact block provides a way to improve efficiency of bandwidth usage.
+Since transactions are recevied and verified when broadcast, and stored in a nodes mempool,
+it is very inefficient to resend them again when a valid block is constructed and broadcast in its entirety.
+The compact block sends the block, with header as before, but the full transaction list is replaced by
+a list of what is known as "Short Ids".  These are 6 byte hashes, known as sighash, that gives additional savings over broadcasting
+the full 32 byte transaction hash.  By sighashing the transaction ids in your mempool, you can match them with the "Short Ids" in the 
+list and build the block from your existing transaction.  
+
+Additionally, transactions can be appended to a compact block,
+they are referred to as prefilled transactions, here is where the coinbase transaction goes, and optionally along
+with other transactions that is expected to be missing from the node
+
+### Header parsing
+
+This does not change, same 80 byte header as above.
+
+### Additional parsing
+
+Following the header is an 8 byte nonce.  This is used in the sighash operation to calculate against your mempool long txids for matching
+

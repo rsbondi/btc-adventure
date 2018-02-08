@@ -15,7 +15,7 @@ const port = 18333 // testnet
 const peer = '192.168.0.132'
 const sender = '192.168.0.23'
 const myversion = 70015
-const lastblock = 111
+const lastblock = 1278499
 
 function createHeader(command) {
     const header = new Bitwriter()
@@ -73,7 +73,17 @@ const handlers = {
         clientrequest(magic + "76657261636B000000000000000000005DF6E0E2")
     },
     verack: function() {
+        const header = createHeader('sendcmpct')
+        header.writeInt(9, 4)
+        header.write(calccheck('000200000000000000'))
+        header.write('000200000000000000')
+        clientrequest(header.getValue())
 
+        const header1 = createHeader('sendcmpct')
+        header1.writeInt(9, 4)
+        header1.write(calccheck('000100000000000000'))
+        header1.write('000100000000000000')
+        clientrequest(header1.getValue())
     },
     ping: function(nonce) {
         const header = createHeader('pong')
@@ -116,6 +126,19 @@ const handlers = {
                 console.log('getdata', header.getValue()+msg.getValue())
                 clientrequest(header.getValue()+msg.getValue())
             }
+            if(invtype == invtypes.MSG_BLOCK) {
+                const header = createHeader('getdata')
+                
+                const msg = new Bitwriter()
+                msg.writeVarInt(1)
+                msg.writeInt(invtypes.MSG_CMPCT_BLOCK, 4)
+                msg.write(hash)
+                
+                header.writeInt(msg.getValue().length / 2, 4)
+                header.write(calccheck(msg.getValue()))
+                console.log('getdata MSG_CMPCT_BLOCK', header.getValue()+msg.getValue())
+                clientrequest(header.getValue()+msg.getValue())
+            }
         }
 
         // Allows a node to advertise its knowledge of one or more objects. It can be received unsolicited, or in reply to getblocks.
@@ -134,7 +157,7 @@ const handlers = {
         */
     },
     tx: function(tx) {
-        console.log(JSON.stringify(Transaction.parseRaw(tx) , null, 2))
+        // console.log(JSON.stringify(Transaction.parseRaw(tx) , null, 2))
     },
     block: function (block) {
         console.log(JSON.stringify(Block.parseRaw(block), null, 2))
@@ -147,7 +170,8 @@ const handlers = {
         const reader = new Biterator(cmpct)
         const shouldsend = reader.readInt(1)
         const cmpctver = reader.readInt(8)
-        console.log('sendcmpct version', cmpctver, `should ${shouldsend ? ' ' : 'not '}send cmpctblock message`)
+        // if not sending, use getdata with type MSG_CMPCT_BLOCK
+        console.log('sendcmpct version', cmpctver, `should ${shouldsend ? ' ' : 'not '}send cmpctblock message ${cmpct}`)
     },
     sendheaders: function (empty) {
         console.log('sendheaders command, I am permitted, but not required, to announce new blocks by headers command (instead of inv command) BIP-130')
