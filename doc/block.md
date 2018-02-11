@@ -20,9 +20,8 @@ Here is the block description verbatim from the bitcoin wiki
 
 ```javascript
 
-parseRaw: function(blockstr) {
-    const reader   = new Biterator(blockstr)
-    const header = {
+parseHeader: function(reader) {
+    return {
         version  : reader.readInt(4),
         previous : Bytes.toHex(reader.readBytes(32).reverse()),
         merkle   : Bytes.toHex(reader.readBytes(32).reverse()),
@@ -32,6 +31,11 @@ parseRaw: function(blockstr) {
     }
     ...
 }
+...
+
+// call with
+const reader   = new Biterator(blockstr)
+const header = Block.parseHeader(reader)
 ```
 
 The above is just applying what we learned in previous sections to the definition in the table
@@ -39,6 +43,8 @@ The above is just applying what we learned in previous sections to the definitio
 ## Block Transactions
 
 ### Transaction parsing
+
+continue with reader created above
 
 ```javascript
     const ntx = reader.readVarInt()
@@ -119,4 +125,34 @@ This does not change, same 80 byte header as above.
 ### Additional parsing
 
 Following the header is an 8 byte nonce.  This is used in the sighash operation to calculate against your mempool long txids for matching
+
+A list of the six byte siphashes is next preceeded by the count
+
+Next the prefilled transactions preceeded by the count.  This differs slightly from normal transaction processing in a block, each transaction is preceeded by and index to its position in the block
+
+```javascript
+parseCompact: function(blockstr) {
+        const reader   = new Biterator(blockstr)
+        const header = Block.parseHeader(reader)
+
+        const nonce = reader.readInt(8) // A nonce for use in short transaction ID calculations, maybe this should be hex characters?
+        const idslength = reader.readVarInt()
+        let ids = [] // compare to your mempool transactions by calculating siphash for mempool txids and match to build block
+        for(let i=0; i<idslength; i++) {
+            ids.push(Bytes.toHex(reader.readBytes(6))) 
+        }
+
+        const prefillLen = reader.readVarInt()
+        let txs =[]
+        let txbuf = Bytes.toHex(reader.getRemaining())
+        for(let t=0; t<prefillLen; t++) {
+            const txreader   = new Biterator(txbuf)
+            let txindex = txreader.readVarInt()
+            txbuf = Bytes.toHex(txreader.getRemaining())
+            const tx = Transaction.parseRaw(txbuf)
+            txs.push(tx)
+            txbuf = txbuf.slice(tx.size*2) 
+        }
+    }
+    ```
 
