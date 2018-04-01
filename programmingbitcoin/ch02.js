@@ -35,3 +35,14 @@ console.log('point at infinity addition communicative', notinf.add(inf))
 const minusnotinf = new Point(notinf.x, -notinf.y, notinf.a, notinf.b)
 console.log('add negative of point', notinf.add(minusnotinf))
 console.log('add negative of point communicative', minusnotinf.add(notinf))
+
+
+// Exercise 6
+let p1 = new Point(2, 5, 5, 7)
+let p2 = new Point(-1, -1, 5, 7)
+
+console.log('add points x1 != x2', p1.add(p2))
+
+// exercise 8
+p1 =  new Point(-1, 1, 5, 7)
+console.log('add equal points', p1.add(p1))
