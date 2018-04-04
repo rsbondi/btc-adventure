@@ -54,7 +54,6 @@ points.forEach(p => {
     // console.log('add negative of point', notinf.add(minusnotinf))
 // console.log('add negative of point communicative', minusnotinf.add(notinf)) }
 
-
 // Exercise 3
 
 let addends = [
@@ -66,6 +65,9 @@ let addends = [
 
 let sum = addends[0].add(addends[1]).add(addends[2]).add(addends[3])
 console.log(`add (${sum.x.num}, ${sum.y.num})`)
+
+sum = addends[3].add(addends[2]).add(addends[1]).add(addends[0]) // my addition
+console.log(`add communicative (${sum.x.num}, ${sum.y.num})`)
 
 addends = [
     {x: 143, y: 98}, 
