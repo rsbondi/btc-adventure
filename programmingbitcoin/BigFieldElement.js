@@ -37,7 +37,7 @@ class BigFieldElement {
 
     pow(other) {
         this._valid(other)
-        return new this.constructor(bigInt(this.num).pow(other.num).mod(this.prime), this.prime)
+        return new this.constructor(bigInt(this.num).modPow(other.num, this.prime), this.prime)
     }
 
     div(other) {

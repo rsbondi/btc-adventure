@@ -3,6 +3,8 @@ const { BigFieldElement } = require('./BigFieldElement')
 
 class BigPoint{
     constructor(x, y, a, b) {
+        this.two = new BigFieldElement(bigInt(2), y.prime)
+        this.three = new BigFieldElement(bigInt(3), x.prime)
         this.x = x
         this.y = y
         this.a = a
@@ -11,10 +13,10 @@ class BigPoint{
         if(x === null && y === null) {
             this.infinity = true
         } else {
-            const ysquared = bigInt(this.y).pow(2)
-            const quad = bigInt(this.x).pow(3).add(bigInt(this.a).multiply(this.x)).add(this.b)
+            const ysquared = this.y.pow(this.two)
+            const quad = this.x.pow(this.three).add(this.a.mul(this.x)).add(this.b)
             if(ysquared.neq(quad))
-                throw(`Point (${x},${y}) is not on the curve where a,b=${a},${b}`)
+                throw(`Point (${x.num},${y.num}) is not on the curve where a,b=${a.num},${b.num}`)
         }
     }
 
@@ -38,18 +40,16 @@ class BigPoint{
         if(other.infinity) return this
 
         // exercise 5
-        if(this.x.eq(other.x) && this.y.add(other.y).eq(0)) return new this.constructor(new BigFieldElement(null, this.x.prime), new BigFieldElement(null, this.x.prime), this.a, this.b)
+        if(this.x.eq(other.x) && this.y.add(other.y).eq(new BigFieldElement(bigInt(0), this.x.prime))) return new this.constructor(new BigFieldElement(null, this.x.prime), new BigFieldElement(null, this.x.prime), this.a, this.b)
 
         let s, x3, y3
         if(this.neq(other)) {
-            // exercise 7
-            s = bigInt(other.y).subtract(this.y).divide(bigInt(other.x).subtract(this.x)) // s=(y2-y1)/(x2-x1)
+            s = other.y.sub(this.y).div(other.x.sub(this.x)) // s=(y2-y1)/(x2-x1)
         } else {
-            // exercise 9
-            s = bigInt(this.x).pow(2).multiply(3).add(this.a).divide(bigInt(this.y).multiply(2)) // s=(3x1^2+a)/(2y1)
+            s = this.x.pow(this.two).mul(this.three).add(this.a).div(this.y.mul(this.two)) // s=(3x1^2+a)/(2y1)
         }
-        x3 = s.pow(2).subtract(this.x).subtract(other.x)
-        y3 = s.multiply(bigInt(this.x).subtract(x3)).subtract(this.y) // y3=s(x1-x3)-y1
+        x3 = s.pow(this.two).sub(this.x).sub(other.x)
+        y3 = s.mul(this.x.sub(x3)).sub(this.y) // y3=s(x1-x3)-y1
         return new this.constructor(x3, y3, this.a, this.b)
 
     }
