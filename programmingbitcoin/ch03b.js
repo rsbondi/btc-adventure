@@ -1,6 +1,7 @@
 const { S256Point, N , G} = require('./S256Point')
 const { S256Field} = require('./S256Field')
 const { Signature} = require('./Signature')
+const { PrivateKey} = require('./PrivateKey')
 const bigInt = require('big-integer')
 
 const GtimesN = G.mul(N)
@@ -17,3 +18,9 @@ const z = bigInt("10597224687721072119920752250412561668105746180164990098857683
 
 const ok = pub.verify(z, sig)
 console.log('sig ok', ok)
+
+const pk = new PrivateKey(bigInt("111111111111111111111111111111111111111111"))
+const signed = pk.sign(z)
+
+const sigok = pk.point.verify(z, signed)
+console.log('sig ok',sigok)
