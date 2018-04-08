@@ -12,7 +12,7 @@ class PrivateKey {
         const k = bigInt.randBetween(1, N)
         const r = G.mul(k).x.num
         const k_inv = k.modPow(N.subtract(2), N)
-        const s = z.add(r.multiply(this.secret)).multiply(k_inv).mod(N)
+        let s = z.add(r.multiply(this.secret)).multiply(k_inv).mod(N)
         if(s.gt(N.divide(2))) s = N.subtract(s)
         return new Signature(r, s)
     }

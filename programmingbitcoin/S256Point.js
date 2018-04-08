@@ -40,6 +40,15 @@ class S256Point extends BigPoint {
         const total = G.mul(u).add(this.mul(v))
         return total.x.num.eq(sig.r)
     }
+
+    sec() {
+        console.log()
+        return Buffer.concat([
+            Buffer.from('04','hex'), 
+            Buffer.from(this.x.num.toString(16),'hex'), 
+            Buffer.from(this.y.num.toString(16),'hex')
+        ])
+    }
 }
 
 const G = new S256Point(
