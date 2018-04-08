@@ -4,3 +4,7 @@ class Signature {
         this.s = s // s = (z+re)/k
     }
 }
+
+module.exports = {
+    Signature: Signature
+}

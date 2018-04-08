@@ -33,20 +33,12 @@ class S256Point extends BigPoint {
         return sum
     }
 
-    /*
-        # 1/s = pow(s, N-2, N)
-        s_inv = pow(sig.s, N-2, N)
-        # u = z / s
-        u = z * s_inv % N
-        # v = r / s
-        v = sig.r * s_inv % N
-        # u*G + v*P should have as the x coordinate, r
-        total = u*G + v*self
-        return total.x.num == sig.r
-    */
     verify(z, sig) {
-        const s_inv = sig.s.modPow(N-2, N)
+        const s_inv = sig.s.modPow(N.subtract(2), N)
         const u = z.multiply(s_inv).mod(N)
+        const v = sig.r.multiply(s_inv).mod(N)
+        const total = G.mul(u).add(this.mul(v))
+        return total.x.num.eq(sig.r)
     }
 }
 
