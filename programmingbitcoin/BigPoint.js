@@ -3,8 +3,8 @@ const { BigFieldElement } = require('./BigFieldElement')
 
 class BigPoint{
     constructor(x, y, a, b) {
-        this.two = new BigFieldElement(bigInt(2), y.prime)
-        this.three = new BigFieldElement(bigInt(3), x.prime)
+        this.two = new BigFieldElement(bigInt(2), a.prime)
+        this.three = new BigFieldElement(bigInt(3), a.prime)
         this.x = x
         this.y = y
         this.a = a
@@ -40,7 +40,9 @@ class BigPoint{
         if(other.infinity) return this
 
         // exercise 5
-        if(this.x.eq(other.x) && this.y.add(other.y).eq(new BigFieldElement(bigInt(0), this.x.prime))) return new this.constructor(new BigFieldElement(null, this.x.prime), new BigFieldElement(null, this.x.prime), this.a, this.b)
+        if(this.x.eq(other.x) && this.y.add(other.y).eq(new BigFieldElement(bigInt(0), this.x.prime))) {
+            return new this.constructor(null, null, this.a, this.b)
+        }
 
         let s, x3, y3
         if(this.neq(other)) {
