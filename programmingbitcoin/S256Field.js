@@ -7,6 +7,10 @@ class S256Field extends BigFieldElement {
     constructor(num) {
         super(num, P)
     }
+
+    sqrt() {
+        return this.pow(new S256Field(P.add(1).divide(4)))
+    }
 }
 
 module.exports = {
