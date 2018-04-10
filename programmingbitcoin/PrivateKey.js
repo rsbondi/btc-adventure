@@ -1,5 +1,6 @@
 const { N , G} = require('./S256Point')
 const { Signature } = require('./Signature')
+const { Util } = require('./Util')
 const bigInt = require('big-integer')
 
 class PrivateKey {
@@ -16,6 +17,20 @@ class PrivateKey {
         if(s.gt(N.divide(2))) s = N.subtract(s)
         return new Signature(r, s)
     }
+
+    wif(testnet=false) {
+        let prefix = '80', suffix = ''
+        if(testnet) prefix = 'ef'
+
+        let secret_string = this.secret.toString(16) 
+        // whoa this is hex, need to pad for bytes, TODO: update other occurences (sec, der)
+        if(secret_string.length%2) secret_string ='0'+secret_string 
+        const secret_bytes = Buffer.from(secret_string, 'hex')
+
+        if(this.compressed) suffix = '01'
+        return Util.encode_base58_checksum(Buffer.concat([Buffer.from(prefix, 'hex'), secret_bytes, Buffer.from(suffix, 'hex')]))
+    }
+
 }
 
 module.exports = {

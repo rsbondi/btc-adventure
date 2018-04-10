@@ -1,6 +1,7 @@
 const { BigPoint } = require('./BigPoint')
 const { S256Field } = require('./S256Field')
 const { Signature } = require('./Signature')
+const { Util } = require('./Util')
 const crypto = require('crypto')
 const ripemd160 = require('ripemd160')
 const bigInt = require('big-integer')
@@ -51,48 +52,15 @@ class S256Point extends BigPoint {
             return Buffer.concat([Buffer.from('04','hex'), xbuf, Buffer.from(this.y.num.toString(16),'hex')])
     }
 
-    //#region DontBelongHere
-    encode_base58(s) {
-        const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-        let count = 0
-        while(!s[count]) count++
-
-        let result = []
-        let num = bigInt(s.toString('hex'), 16)
-        let mod
-        while (num.gt(0)) {
-            [num, mod] = Object.values(num.divmod(58))
-            result.unshift(alphabet[mod].charCodeAt(0))
-        }
-        for(let c=0; c<count; c++) result.unshift('1'.charCodeAt(0))
-        return new Buffer(result)
-    }
-
-    double_sha256(s) {
-        const first = crypto.createHash('sha256').update(s).digest()
-        return crypto.createHash('sha256').update(first).digest()
-    }
-
-    hash160(s) {
-        const first = crypto.createHash('sha256').update(s).digest()
-        return new ripemd160().update(first).digest()
-
-    }
-
-    encode_base58_checksum(s) {
-        return this.encode_base58(Buffer.concat([s, this.double_sha256(s).slice(0, 4)]))
-    }
-
-    //#endregion
-
     h160(compressed=true) {
-        return this.hash160(this.sec(compressed))
+        return Util.hash160(this.sec(compressed))
     }
 
     address(compressed=true, prefix='00') {
         const h160 = this.h160(compressed)
-        return this.encode_base58_checksum(Buffer.concat([Buffer.from(prefix, 'hex'), h160]))
+        return Util.encode_base58_checksum(Buffer.concat([Buffer.from(prefix, 'hex'), h160]))
     }
+
 }
 
 const G = new S256Point(
