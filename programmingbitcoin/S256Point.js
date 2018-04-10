@@ -48,6 +48,22 @@ class S256Point extends BigPoint {
         else 
             return Buffer.concat([Buffer.from('04','hex'), xbuf, Buffer.from(this.y.num.toString(16),'hex')])
     }
+
+    encode_base58(s) {
+        const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+        let count = 0
+        while(!s[count]) count++
+
+        let result = []
+        let num = bigInt(s.toString('hex'), 16)
+        let mod
+        while (num.gt(0)) {
+            [num, mod] = Object.values(num.divmod(58))
+            result.unshift(alphabet[mod].charCodeAt(0))
+        }
+        for(let c=0; c<count; c++) result.unshift('1'.charCodeAt(0))
+        return new Buffer(result)
+    }
 }
 
 const G = new S256Point(

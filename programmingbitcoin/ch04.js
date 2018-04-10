@@ -21,3 +21,5 @@ const pr = bigInt("f93441bb92d20b7383732687cf662f3b0aeb1ea4ef6f3db2f745f16ca63c1
 const ps = bigInt("783e6eb62119728c016e30bfec33af09e24a80b0c393b269533c38d04c554503", 16)
 const sig = new Signature(pr, ps)
 console.log('der', sig.der().toString('hex'))
+
+console.log('base58', pub.encode_base58(new Buffer.from('000000abcd1234','hex')).toString())
