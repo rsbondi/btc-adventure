@@ -45,11 +45,11 @@ class S256Point extends BigPoint {
     }
 
     sec(compressed) {
-        const xbuf = Buffer.from(this.x.num.toString(16),'hex')
+        const xbuf = Buffer.from(Util.bigByteString(this.x.num),'hex')
         if(compressed) 
             return Buffer.concat([Buffer.from(this.y.num.mod(2).eq(0) ? '02' : '03', 'hex'), xbuf])
         else 
-            return Buffer.concat([Buffer.from('04','hex'), xbuf, Buffer.from(this.y.num.toString(16),'hex')])
+            return Buffer.concat([Buffer.from('04','hex'), xbuf, Buffer.from(Util.bigByteString(this.y.num),'hex')])
     }
 
     h160(compressed=true) {

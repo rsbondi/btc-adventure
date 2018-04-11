@@ -32,6 +32,11 @@ let Util = {
 
     encode_base58_checksum(s) {
         return Util.encode_base58(Buffer.concat([s, Util.double_sha256(s).slice(0, 4)]))
+    },
+
+    bigByteString(big) {
+        const hex = big.toString(16)
+        return hex.length%2 ? '0'+hex : hex
     }
 }
 

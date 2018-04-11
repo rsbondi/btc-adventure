@@ -22,9 +22,7 @@ class PrivateKey {
         let prefix = '80', suffix = ''
         if(testnet) prefix = 'ef'
 
-        let secret_string = this.secret.toString(16) 
-        // whoa this is hex, need to pad for bytes, TODO: update other occurences (sec, der)
-        if(secret_string.length%2) secret_string ='0'+secret_string 
+        let secret_string = Util.bigByteString(this.secret) 
         const secret_bytes = Buffer.from(secret_string, 'hex')
 
         if(this.compressed) suffix = '01'
