@@ -133,7 +133,26 @@ const Transaction = {
     // createmultisig nrequired ["key",...]
     createMulti: function(nrequired, keys) {
 
-    } 
+    } ,
+    verifyHash(raw, prev) {
+      let tx = Transaction.parseRaw(raw)
+      let verifyHashes = []
+      tx.vin.forEach(function(vin, i) {
+        let pubkey = prev[vin.txid].vout[vin.vout].scriptPubKey.hex
+        const sigkey = vin.scriptSig.asm.split(' ')
+        let sig = sigkey[0]
+        hashtype = sig.slice(-2)
+        let txcopy = Object.assign({}, tx)
+        txcopy.vin.forEach(function(cvin, ci) {
+          if(ci == i) {
+            txcopy.vin[ci].scriptSig = {hex: pubkey}
+          } else cvin = '00'
+        })
+        const ser = Transaction.serailize(txcopy)
+        verifyHashes.push(Hash.dhash(`${ser}${hashtype}000000`))
+      })
+      return verifyHashes
+    }
 }
 
 

@@ -1,12 +1,13 @@
-const { Hash } = require('./common.js')
+const { Hash, Bytes } = require('./common.js')
 const crypto = require('crypto')
 const ec = new require('elliptic').ec('secp256k1');
 
 module.exports = {
-  Interpretor: function() {
+  Interpretor: function(hash) {
     // TODO: check for bool as 0 and 1
     let stack = []
     let branch = []
+    const txhash = hash
     const ops = {
       OP_0:                   function() { stack.push('') },
       OP_PUSHDATA1:           function() {},                                                          // The next byte contains the number of bytes to be pushed onto the stack.
@@ -96,7 +97,15 @@ module.exports = {
       OP_HASH160:             function() { const top = stack.pop(); stack.push(Hash.hash160(top)) },
       OP_HASH256:             function() { const top = stack.pop(); stack.push(Hash.dhash(top)) },
       OP_CODESEPARATOR:       function() {},                                                          // All of the signature checking words will only match signatures to the data after the most recently-executed OP_CODESEPARATOR.
-      OP_CHECKSIG:            function() { const pub = stack.pop(); const sig = stack.pop();  },
+      OP_CHECKSIG:            function() { 
+        const pub = stack.pop(); 
+        const sig = stack.pop();  
+        const key = ec.keyFromPublic(pub, 'hex')
+        const ver = key.verify(txhash, sig)
+        stack.push(ver)
+        console.log(ver);
+        
+      },
       OP_CHECKSIGVERIFY:      function() { this.OP_CHECKSIG(); this.OP_VERIFY() },                                                          // Same as OP_CHECKSIG, but OP_VERIFY is executed afterward. fail if fales
       /*
       Compares the first signature against each public key until it finds an ECDSA match. Starting with the subsequent public key, 
