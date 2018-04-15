@@ -31,7 +31,6 @@ class Reader {
 
     read(n) {
         if(this.index == this.buffer.length) return null
-        // let ret = new Buffer.from(this.buffer.slice(this.index, this.index+n))
         let ret = this.buffer.slice(this.index, this.index+n)
         ret = bigInt(ret.toString('hex'), 16)
         this.index += n

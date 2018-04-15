@@ -255,7 +255,43 @@ TODO: code is in place but need to describe
 
 ## Verifying transactions
 
-TODO: code is in place but need to describe
+This is a little bit tricky, the hardest part was figuring out what to use to verify the signature.  The public key and the signature part is obvious, but the "message" took some work to derive.  The steps to do so are outlined in [this](https://en.bitcoin.it/wiki/File:Bitcoin_OpCheckSig_InDetail.png) image.  Following the steps, it was not too painful, since I had already had the parsing and serializing working.  To verify a transaction, the TLDR is you replace the input `scriptSig` with the `scriptPubKey` from its corresponding output from the previous transaction.  There is a little more to it, check the image, but I omitted for my own clarity.  I made the following code to get the "message" part of the verification.
 
-this is a little out of sequence from the real world but helped me understand the verification process
+```javascript
+  verifyHash(raw, prev) {
+    let tx = Transaction.parseRaw(raw)
+    let verifyHashes = []
+    tx.vin.forEach(function(vin, i) {
+      let pubkey = prev[vin.txid].vout[vin.vout].scriptPubKey.hex
+      const sigkey = vin.scriptSig.asm.split(' ')
+      let sig = sigkey[0]
+      hashtype = sig.slice(-2)
+      let txcopy = Object.assign({}, tx)
+      txcopy.vin.forEach(function(cvin, ci) {
+        if(ci == i) {
+          txcopy.vin[ci].scriptSig = {hex: pubkey}
+        } else cvin = '00'
+      })
+      const ser = Transaction.serailize(txcopy)
+      verifyHashes.push(Hash.dhash(`${ser}${hashtype}000000`))
+    })
+    return verifyHashes
+  }
+```
+
+I am pushing all input "messages" to an array, in the real world I imagine that the verification would be in the same loop but this makes it easier to visualize by separating it out.
+
+The `OP_CHECKSIG` part of the interpreter looks like this
+
+```javascript
+  OP_CHECKSIG: function() { 
+    const pub = stack.pop(); 
+    const sig = stack.pop();  
+    const key = ec.keyFromPublic(pub, 'hex')
+    const ver = key.verify(txhash, sig)
+    stack.push(ver)
+  }
+```
+
+where `txhash` is the hash caclulated by serializing with the `scriptPubKey` substitued for `scriptSig`
 

@@ -101,10 +101,8 @@ module.exports = {
         const pub = stack.pop(); 
         const sig = stack.pop();  
         const key = ec.keyFromPublic(pub, 'hex')
-        const ver = key.verify(txhash, sig)
+        const ver = key.verify(txhash, sig) * 1 // true/false to 1/0
         stack.push(ver)
-        console.log(ver);
-        
       },
       OP_CHECKSIGVERIFY:      function() { this.OP_CHECKSIG(); this.OP_VERIFY() },                                                          // Same as OP_CHECKSIG, but OP_VERIFY is executed afterward. fail if fales
       /*
