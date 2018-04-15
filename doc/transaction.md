@@ -251,7 +251,69 @@ _it is important to note that hashing is done on the binary data, these wrappers
 
 ## Serializing transactions
 
-TODO: code is in place but need to describe
+Serializing a transaction puts all the bytes into the sequence that we parsed above.  It consist of the same 4 sections as above, version, inputs, outputs and locktime.  If there is witness data, the marker/flag and the witness data.
+
+### version
+
+```javascript
+  const writer = new Bitwriter()
+
+  writer.writeInt(tx.version, 4)
+```
+
+### marker/flag, if applicable
+
+```javascript
+  const hasWitness = tx.vin[0].txinwitness ? 1 : 0
+
+  if(hasWitness) writer.write('0001')
+```
+
+### inputs
+
+```javascript
+  writer.writeVarInt(tx.vin.length)
+
+  tx.vin.forEach(input => {
+    writer.write(Bytes.reverseHex(input.txid))
+    writer.writeInt(input.vout, 4)
+    writer.writeVarInt(input.scriptSig.hex.length / 2)
+    writer.write(input.scriptSig.hex)
+    writer.writeInt(input.sequence, 4)
+  }) 
+```
+
+### outputs
+
+```javascript
+  writer.writeVarInt(tx.vout.length)
+  tx.vout.forEach(out => {
+    writer.writeInt(out.value * 100000000, 8)
+    writer.writeVarInt(out.scriptPubKey.hex.length/2)
+    writer.write(out.scriptPubKey.hex)
+  })
+```
+
+### witness data, if applicable
+
+```javascript
+  if(hasWitness) {
+    tx.vin.forEach(input => {
+      const nwit = input.txinwitness.length
+      writer.writeVarInt(nwit)
+      input.txinwitness.forEach(wit => {
+        writer.writeVarInt(wit.length)
+        writer.write(wit)
+      })
+    })
+  }
+```
+
+### locktime
+
+```javascript
+  writer.writeInt(tx.locktime, 4)
+```
 
 ## Verifying transactions
 
