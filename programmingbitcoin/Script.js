@@ -1,4 +1,5 @@
 const bigInt = require('big-integer')
+const { Reader } = require('./Util')
 
 class Script {
     constructor(elements) {
@@ -19,22 +20,6 @@ class Script {
         }
 
         return new this(elements)
-    }
-}
-
-class Reader {
-    constructor(buffer) {
-        this.buffer = buffer
-        this.index = 0
-        
-    }
-
-    read(n) {
-        if(this.index == this.buffer.length) return null
-        let ret = this.buffer.slice(this.index, this.index+n)
-        ret = bigInt(ret.toString('hex'), 16)
-        this.index += n
-        return ret
     }
 }
 

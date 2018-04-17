@@ -40,6 +40,30 @@ let Util = {
     }
 }
 
+class Reader {
+    constructor(buffer) {
+        this.buffer = buffer
+        this.index = 0
+        
+    }
+
+    read(n, le) {
+        if(this.index >= this.buffer.length) return null
+        let ret = this.buffer.slice(this.index, this.index+n)
+        if(le) ret = Buffer.from(new Uint8Array(ret).reverse())
+        ret = bigInt(ret.toString('hex'), 16)
+        this.index += n
+        return ret
+    }
+
+    read_varint() {
+        var byte = this.read(1)
+        if(byte < 0xFD) return byte
+        else return this.read(2 * (byte-0xFC))
+    }
+}
+
 module.exports = {
-    Util: Util
+    Util: Util,
+    Reader: Reader
 }
