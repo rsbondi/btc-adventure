@@ -39,7 +39,7 @@ class FieldPoint{
         if(this.infinity) return other
         if(other.infinity) return this
 
-        if(this.x.eq(other.x) && this.y.num.eq(-other.y.num)) return new this.constructor(null, null, this.a, this.b)
+        if(this.x.eq(other.x) && this.y.eq(-other.y)) return new this.constructor(null, null, this.a, this.b)
 
         let s, x3, y3
         if(this.neq(other)) {

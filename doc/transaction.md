@@ -341,7 +341,9 @@ This is a little bit tricky, the hardest part was figuring out what to use to ve
   }
 ```
 
-I am pushing all input "messages" to an array, in the real world I imagine that the verification would be in the same loop but this makes it easier to visualize by separating it out.
+I am pushing all input "messages" to an array, in the real world this loop would be in the interpreter, a
+node would have all the transactions available and could pick as needed, 
+but this gives me a way to provide to the interpreter the info needed in an experimental environment.
 
 The `OP_CHECKSIG` part of the interpreter looks like this
 
