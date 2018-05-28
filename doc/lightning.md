@@ -10,40 +10,67 @@ Since the bech32 format is used, the bech32 package is used to do the initial pa
 
 ### prefix
 
+The prefix from the bech32 library include all the "human readable" information, which is the `prefix`, `amount` and `multiplier` as defined in the above referenced doc.  The prefix is calculated like this
+
+```javascript
+const prefix = prefixes.reduce(function(o, c, i) {
+    if(!o && bech.prefix.match(c)) o = c
+    return o
+}, '')
+```
+
+This just matches to known prefixes
+
 ### amout
+
+The amount(optional) consists of a numeric value and optionally a units value(`m`, `u`, `n`, `p` for milli, micro, nano and pico).  I introduced the `bignumber.js` library to handle the level of decimal places.
+
+```javascript
+const amt = bech.prefix.slice(prefix.length)  // get everything after prefix
+let amount = new big(0)
+if(amt) {
+    const unit = amt.slice(-1)                // get last character
+    if(~Object.keys(amounts).indexOf(unit)) { // if it is unit char, multiply
+        const val = new big(amt.slice(0, -1))
+        amount = val.times(amounts[unit])
+    } else amount = new big(amt)              // no units, whole btc?
+}
+
+```
 
 ### timestamp
 
 First I created a `Bit` class for handling bits, using strings for readability while debugging.
 
 ```javascript
-   Bit: {
-       Reader: function(bits) {
-           var buf = bits,
-               index = 0
-           return {
-               read: function(n) {
-                   var b = buf.slice(index, index+n) 
-                   index += n
-                   return b              
-               },
-               readInt(n) {
-                   var int = this.read(n).split('').reduce(function(o, bit, i)  
-                       return o.add(bigInt(bit).times(bigInt(2).pow(n-1-i))) // ig endian
-                     }, bigInt(0)) 
-                     return  int.toJSNumber()                
-               }
-           }
-       }
-   }
+Bit: {
+    Reader: function(bits) {
+        const buf = bits
+        let   index = 0
+
+        return {
+            read: function(n) {
+                const b = buf.slice(index, index+n) 
+                index += n
+                return b              
+            },
+            readInt(n) {
+                const int = this.read(n).split('').reduce(function(o, bit, i) { 
+                    return o.add(bigInt(bit).times(bigInt(2).pow(n-1-i))) // big endian
+                    }, bigInt(0)) 
+                    return  int.toJSNumber()                
+            }
+        }
+    }
+}
 ```
 
 Then parse the payment, first convert the "words(5 bit)" into a binary string
 
 ```javascript
-var bin = bech.words.reduce((o, c, i) => {
-    var bin = c.toString(2)
-    for(var i=5-bin.length; i; i--) bin = '0'+bin
+const bin = bech.words.reduce((o, c, i) => {
+    let bin = c.toString(2)
+    for(let i=5-bin.length; i; i--) bin = '0'+bin
     return o + bin
 },'')
 
@@ -52,8 +79,8 @@ var bin = bech.words.reduce((o, c, i) => {
 then create a reader of type `Bit` and read the 35 bit integer
 
 ```javascript
-var reader = Bit.Reader(bin)
-var ts = reader.readInt(35)
+const reader = Bit.Reader(bin)
+const ts = reader.readInt(35)
 
 ```
 
@@ -62,20 +89,36 @@ The `Payement` object
 ```javascript
 Payment: {
     parse: function(req) {
-        var bech = bech32.decode(req, 9999)
+        const bech = bech32.decode(req, 9999)
 
-        var bin = bech.words.reduce((o, c, i) => {
-            var bin = c.toString(2)
-            for(var i=5-bin.length; i; i--) bin = '0'+bin
+        const prefix = prefixes.reduce(function(o, c, i) {
+            if(!o && bech.prefix.match(c)) o = c
+            return o
+        }, '')
+
+        const amt = bech.prefix.slice(prefix.length)
+        let amount = new big(0)
+        if(amt) {
+            const unit = amt.slice(-1)
+            if(~Object.keys(amounts).indexOf(unit)) {
+                const val = new big(amt.slice(0, -1))
+                amount = val.times(amounts[unit])
+            } else amount = new big(amt) // no units
+        }
+
+        const bin = bech.words.reduce((o, c, i) => {
+            let bin = c.toString(2)
+            for(let i=5-bin.length; i; i--) bin = '0'+bin
             return o + bin
         },'')
         
-        var reader = Bit.Reader(bin)
-        var ts = reader.readInt(35)
+        const reader = Bit.Reader(bin)
+        const ts = reader.readInt(35)
 
         return {
-            prefix     : bech.prefix,
-            timestamp  : ts
+            prefix     : prefix,
+            timestamp  : ts,
+            amount     : amount.toNumber()
         }
 
     }
