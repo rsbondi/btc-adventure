@@ -16,6 +16,17 @@ const amounts = {
     
 }
 
+const types = {
+     1: {label: 'payment_hash', process(data) { return Buffer.from(Bit.str2bin(data)).toString('hex')}},
+    13: {label: 'description', process(data) { return Buffer.from(Bit.str2bin(data)).toString('utf8')}},
+    19: {label: 'payee_pubkey', process(data) { return data}},
+    23: {label: 'purpose_hash', process(data) { return data}},
+     6: {label: 'expiry', process(data) { return data}},
+    24: {label: 'min_final_cltv_expiry', process(data) { return data}},
+     9: {label: 'witness', process(data) { return data}},
+     3: {label: 'routing', process(data) { return data}},
+ }
+
 module.exports = {
     Payment: {
         parse: function(req) {
@@ -45,10 +56,22 @@ module.exports = {
             const reader = Bit.Reader(bin)
             const ts = reader.readInt(35)
 
+            let tagged = []
+            while(reader.remaining() > 520) { // have data
+                const type = reader.readInt(5)
+                const len  = reader.readInt(10)
+                const data = reader.read(len * 5)
+                tagged.push({type: types[type].label, data: types[type].process(data)})
+            }
+
+            const sig = reader.read(512)
+
             return {
-                prefix     : prefix,
-                timestamp  : ts,
-                amount     : amount.toNumber()
+                prefix       : prefix,
+                timestamp    : ts,
+                amount       : amount.toNumber(),
+                taggedFields : tagged,
+                signature    : sig
             }
 
         }

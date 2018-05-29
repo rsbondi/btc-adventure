@@ -7,7 +7,7 @@ module.exports = {
             let   index = 0
 
             return {
-                read: function(n) {
+                read(n) {
                     const b = buf.slice(index, index+n) 
                     index += n
                     return b              
@@ -17,8 +17,18 @@ module.exports = {
                         return o.add(bigInt(bit).times(bigInt(2).pow(n-1-i))) // big endian
                       }, bigInt(0)) 
                       return  int.toJSNumber()                
+                },
+                remaining() {
+                    return buf.length - index
                 }
             }
+        },
+        str2bin(str) {
+            let bin = []
+            for(let i=0; i<str.length; i+=8) {
+                bin.push(parseInt(str.slice(i, i+8),2))
+            }
+            return bin
         }
     }
 }
