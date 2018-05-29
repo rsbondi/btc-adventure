@@ -16,15 +16,19 @@ const amounts = {
     
 }
 
+function binStr2hex(bin) {
+    return Buffer.from(Bit.str2bin(bin)).toString('hex')
+}
+
 const types = {
-     1: {label: 'payment_hash', process(data) { return Buffer.from(Bit.str2bin(data)).toString('hex')}},
-    13: {label: 'description', process(data) { return Buffer.from(Bit.str2bin(data)).toString('utf8')}},
-    19: {label: 'payee_pubkey', process(data) { return data}},
-    23: {label: 'purpose_hash', process(data) { return data}},
-     6: {label: 'expiry', process(data) { return data}},
-    24: {label: 'min_final_cltv_expiry', process(data) { return data}},
-     9: {label: 'witness', process(data) { return data}},
-     3: {label: 'routing', process(data) { return data}},
+     1: {label: 'payment_hash',          process(data) { return binStr2hex(data) } },
+    13: {label: 'description',           process(data) { return Buffer.from(Bit.str2bin(data)).toString('utf8')}},
+    19: {label: 'payee_pubkey',          process(data) { return binStr2hex(data) }},
+    23: {label: 'purpose_hash',          process(data) { return binStr2hex(data) }},
+     6: {label: 'expiry',                process(data) { return Bit.Reader(data).readInt(data.length) }},
+    24: {label: 'min_final_cltv_expiry', process(data) { return Bit.Reader(data).readInt(data.length) }},
+     9: {label: 'witness',               process(data) { return binStr2hex(data) }},
+     3: {label: 'routing',               process(data) { return data}},
  }
 
 module.exports = {
@@ -64,7 +68,7 @@ module.exports = {
                 tagged.push({type: types[type].label, data: types[type].process(data)})
             }
 
-            const sig = reader.read(512)
+            const sig = binStr2hex(reader.read(512))
 
             return {
                 prefix       : prefix,
