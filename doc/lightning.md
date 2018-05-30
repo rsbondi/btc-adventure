@@ -116,8 +116,24 @@ const types = {
      6: {label: 'expiry',                process(data) { return Bit.Reader(data).readInt(data.length) }},
     24: {label: 'min_final_cltv_expiry', process(data) { return Bit.Reader(data).readInt(data.length) }},
      9: {label: 'witness',               process(data) { return binStr2hex(data) }},
-     3: {label: 'routing',               process(data) { return data}},
- }
+     3: {
+            label: 'routing',
+            process(data) { 
+                const reader = Bit.Reader(data)
+                let routing = []
+                while(reader.remaining() >= 408)
+                    routing.push({
+                        pubkey                     : binStr2hex(reader.read(264)),
+                        short_channel_id           : binStr2hex(reader.read(64)),
+                        fee_base_msat              : reader.readInt(32),
+                        fee_proportional_millionths: reader.readInt(32),
+                        cltv_expiry_delta          : reader.readInt(16)
+                    })
+                
+                return routing
+            }
+        }
+}
  ```
 ### Signature
 
