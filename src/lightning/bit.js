@@ -1,7 +1,24 @@
-const bigInt = require('big-integer')
+const bigInt = require('big-integer') // TODO: refactor to bignumber.js
+const big    = require('bignumber.js')
 
 module.exports = {
     Bit: {
+        Writer: {
+            writeInt: function(data, n) {
+                if(!n) {
+                    n = 1
+                    while (data > Math.pow(32, n))n++
+                    n = n * 5
+                }
+                let str = data.toString(2)
+                while(str.length < n) str = '0' + str
+                const words = []
+                for(let i = 0; i < n; i+=5) {
+                    words.push(parseInt(str.slice(i, i+5), 2))
+                }
+                return Buffer.from(words)
+            }
+        },
         Reader: function(bits) {
             const buf = bits
             let   index = 0
@@ -29,6 +46,21 @@ module.exports = {
                 bin.push(parseInt(str.slice(i, i+8),2))
             }
             return bin
+        },
+        str2words(str) {
+            if(!str) return Buffer.from([])
+            let binstr = Buffer.from(str, 'utf8').toString('hex')
+            binstr = (new big(binstr, 16)).toString(2)
+            while(binstr.length%8) binstr = '0'+binstr
+            const arr = []
+            for(let i=0; i<binstr.length; i+=5) {
+                let slice = binstr.slice(i, i+5)
+                while (slice.length <5) {
+                    slice += '0' 
+                }
+                arr.push(parseInt(slice, 2))
+            }
+            return Buffer.from(arr)
         }
     }
 }
