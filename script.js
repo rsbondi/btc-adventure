@@ -1,4 +1,5 @@
 var pre = document.querySelector('pre')
+var sjon = document.querySelector('#json')
 var ta = document.querySelector('textarea')
 var btn = document.querySelector('button')
 
@@ -360,6 +361,7 @@ var Transaction = {
 
     tx.locktime = reader.readInt(4)
     addSpan('version', 'locktime = ' + tx.locktime, reader.getHex())
+    json.innerHTML = JSON.stringify(tx, null, 2)
   }
 
 }
