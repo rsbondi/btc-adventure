@@ -1,5 +1,6 @@
 const { Bytes, Biterator, Hash, Bitwriter } = require('./common')
 const { Script } = require('./script')
+const big    = require('bignumber.js')
 
 // TODO: coninbase seems to parse but has different format
 
@@ -43,7 +44,7 @@ const Transaction = {
       
       for(let i=0;i<nout;i++) {
         let out = {
-          value: reader.readInt(8)/100000000,
+          value: big(reader.readInt(8)).dividedBy(big(100000000)).toNumber(),
           n: i
         }
         const scriptbytes = reader.readBytes(reader.readVarInt())
@@ -102,7 +103,7 @@ const Transaction = {
 
       writer.writeVarInt(tx.vout.length)
       tx.vout.forEach(out => {
-        writer.writeInt(out.value * 100000000, 8)
+        writer.writeInt(big(out.value).multipliedBy(big(100000000).toNumber()), 8)
         writer.writeVarInt(out.scriptPubKey.hex.length/2)
         writer.write(out.scriptPubKey.hex)
       })
@@ -112,7 +113,7 @@ const Transaction = {
           const nwit = input.txinwitness.length
           writer.writeVarInt(nwit)
           input.txinwitness.forEach(wit => {
-            writer.writeVarInt(wit.length)
+            writer.writeVarInt(wit.length/2)
             writer.write(wit)
           })
         })
