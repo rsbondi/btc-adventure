@@ -298,8 +298,8 @@ var Transaction = {
       var sigscript = Script.fromSig(scriptbytes)
       var siglen = scriptbytes.slice(0, 1)
       // :HELP script hash or ??? for witness here
-      addSpan('version', 'input ' + i + (sigscript[2] ? ' sig length = ' : ' hash length = ') + siglen, Bytes.toHex(siglen))
-      addSpan('script', 'input ' + i + (sigscript[2] ? ' signature' : ' hash'), sigscript[0])
+      addSpan('version', 'input ' + i + (sigscript[2] ? ' sig length = ' : ' redeemScript length = ') + siglen, Bytes.toHex(siglen))
+      addSpan('script', 'input ' + i + (sigscript[2] ? ' signature' : ' redeemScript'), sigscript[0])
       addSpan('version', 'input ' + i + ' signature type', sigscript[1])
 
 
