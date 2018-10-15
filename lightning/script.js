@@ -38,7 +38,7 @@ const Bit = {
   },
   str2bin(str) {
       let bin = []
-      for(let i=0; i<str.length; i+=8) {
+      for(let i=0; i<str.length - str.length%8; i+=8) {
           bin.push(parseInt(str.slice(i, i+8),2))
       }
       return bin
