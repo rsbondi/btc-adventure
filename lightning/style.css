@@ -1,0 +1,87 @@
+/* Styles go here */
+
+textarea {
+  width: 100%;
+  height: 200px;
+}
+
+pre {
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  /* padding: 10px; */
+}
+
+.prefix {
+  color: red;
+}
+
+.amount {
+  color: purple;
+}
+
+.sep {
+  color: blue;
+}
+
+.tagged {
+  text-decoration: underline;
+}
+.payment_hash {
+  color: green;
+}
+
+.type {
+  color: orange;
+}
+
+.len {
+  color: magenta;
+}
+
+.signature {
+  color: gray;
+}
+
+.expiry {
+  color: blue;
+}
+
+.description {
+  color: purple;
+}
+
+.timestamp {
+  color: brown;
+}
+
+.checksum {
+  color: brown;
+}
+
+.recovery {
+  color: blue;
+}
+
+.payee_pubkey {
+  color: pink
+}
+
+.purpose_hash {
+  color: cornflowerblue;
+}
+
+.min_final_cltv_expiry {
+  color: lightseagreen;
+}
+
+.witness {
+  color: lightcoral;
+}
+
+.routing {
+  color: burlywood
+}
+
+textarea, .result {
+  font-size: 2em;
+}
