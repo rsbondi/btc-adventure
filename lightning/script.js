@@ -1,20 +1,4 @@
 const Bit = {
-  Writer: {
-      writeInt: function(data, n) {
-          if(!n) {
-              n = 1
-              while (data > Math.pow(32, n))n++
-              n = n * 5
-          }
-          let str = data.toString(2)
-          while(str.length < n) str = '0' + str
-          const words = []
-          for(let i = 0; i < n; i+=5) {
-              words.push(parseInt(str.slice(i, i+5), 2))
-          }
-          return Uint8Array.from(words)
-      }
-  },
   Reader: function(bits) {
       const buf = bits
       let   index = 0
@@ -43,21 +27,6 @@ const Bit = {
       }
       return bin
   },
-  str2words(str) {
-      if(!str) return Uint8Array.from([])
-      let binstr = Uint8Array.from(str, 'utf8').toString('hex')
-      binstr = (new big(binstr, 16)).toString(2)
-      while(binstr.length%8) binstr = '0'+binstr
-      const arr = []
-      for(let i=0; i<binstr.length; i+=5) {
-          let slice = binstr.slice(i, i+5)
-          while (slice.length <5) {
-              slice += '0' 
-          }
-          arr.push(parseInt(slice, 2))
-      }
-      return Uint8Array.from(arr)
-  }
 }
 
 const big    = BigNumber
@@ -107,20 +76,6 @@ const decodeTypes = {
         },
 }
 
-function hexStr2bin(data, n) {
-    let binstr = new big(data, 16).toString(2)
-    while(binstr.length<n) binstr = '0'+binstr 
-    const arr = []
-    for(let i=0; i<binstr.length; i+=5) {
-        let slice = binstr.slice(i, i+5)
-        while (slice.length <5) {
-            slice += '0' // why? Something I do not understand about 5 bit words
-        }
-        arr.push(parseInt(slice, 2))
-    }
-    return Uint8Array.from(arr)
-}
-
 let pre = document.querySelector('pre')
 
 const Payment = {
@@ -151,7 +106,7 @@ const Payment = {
 
         let reqIndex = bech.prefix.length+1
         const sep = req.slice(bech.prefix.length, reqIndex)
-        html += `<span class="sep" title="seperator">${sep}</span>`
+        html += `<span class="sep" title="separator">${sep}</span>`
 
         const bin = bech.words.reduce((o, c, i) => {
             let bin = c.toString(2)
