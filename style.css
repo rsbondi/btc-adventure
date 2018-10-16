@@ -54,3 +54,7 @@ pre {
 .wit {
   color: darkgray;
 }
+
+textarea, .result {
+  font-size: 1.5em;
+}
