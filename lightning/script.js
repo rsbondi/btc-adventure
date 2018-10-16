@@ -34,7 +34,8 @@ const big    = BigNumber
 const prefixes = [
     "lnbcrt",
     "lnbc",
-    "lntb"
+    "lntb",
+    "lnsb"
 ]
 
 const amounts = {
