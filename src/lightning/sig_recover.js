@@ -4,8 +4,6 @@ const crypto = require('crypto')
 
 const payreq = "lnsb20300n1pdarmakpp57zzavxfm39rzg9juc6awru0zfgxvdaewkdupkmmw0x787ds0k04sdqcvdex2ct5v4jzq6twyp3k7er9cqzys7d9uyytydxmsqdz6h9s9wlu2276hjsysa3upu0mz0k55el5323634yjasmnep6hkmyh93ke6nj0v9p3rzgyl5wwu2cfplyg5wv9wdycqaaejt7"
 const bech = bech32.decode(payreq, 9999)
-let words = bech32.toWords(Buffer.from(bech.prefix, 'utf8'))
-
 
 const sig = Buffer.from("f34bc2116469b700345ab960577f8a57b5794090ec781e3f627da94cfe9154751a925d86e790eaf6d92e58db3a9c9ec286231209fa39dc56121f9114730ae693", 'hex')
 const data_part_less_sig = convert(bech.words.slice(0, -104), 5, 8,true)
