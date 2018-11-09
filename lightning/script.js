@@ -65,7 +65,7 @@ const decodeTypes = {
      9: {label: 'fallback_address',      process(data) { 
          let version = Bit.Reader(data).readInt(5)
          if(fallbacks[version]) version = fallbacks[version]; else version = 'v'+version
-         return version+'-'+binStr2hex(data.slice(1)) 
+         return version+'-'+binStr2hex(data.slice(5)) 
         }
     },
      3: {
