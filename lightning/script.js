@@ -46,6 +46,11 @@ const amounts = {
     'p': new big(0.000000000001)
 }
 
+const fallbacks = {
+    17: 'p2pkh',
+    18: 'p2sh'
+}
+
 function binStr2hex(bin) {
   return Array.from(Uint8Array.from(Bit.str2bin(bin))).map(b => b.toString(16).padStart(2, "0")).join("")
 }
@@ -57,7 +62,12 @@ const decodeTypes = {
     23: {label: 'purpose_hash',          process(data) { return binStr2hex(data) }},
      6: {label: 'expiry',                process(data) { return Bit.Reader(data).readInt(data.length) }},
     24: {label: 'min_final_cltv_expiry', process(data) { return Bit.Reader(data).readInt(data.length) }},
-     9: {label: 'witness',               process(data) { return binStr2hex(data) }},
+     9: {label: 'fallback_address',      process(data) { 
+         let version = Bit.Reader(data).readInt(5)
+         if(fallbacks[version]) version = fallbacks[version]; else version = 'v'+version
+         return version+'-'+binStr2hex(data.slice(1)) 
+        }
+    },
      3: {
             label: 'routing',
             process(data) { 
