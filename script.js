@@ -367,4 +367,14 @@ var Transaction = {
 
 }
 
+var search = location.search.substring(1);
+var qs = search ? 
+  JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}', function(key, value) { return key===""?value:decodeURIComponent(value) })
+  : {}
+  
+if(qs.tx) {
+  Transaction.parseRaw(qs.tx)
+  ta.value = qs.tx
+}
+if(qs.name) document.head.querySelector('title').textContent = qs.name
 btn.addEventListener('click', function(e) { Transaction.parseRaw(ta.value) })
