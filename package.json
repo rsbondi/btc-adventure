@@ -12,7 +12,8 @@
     "zombie": "^6.1.4"
   },
   "scripts": {
-    "test": "bmocha --exit"
+    "test": "bmocha --exit",
+    "test-deploy": "TESTDEPLOY=1 bmocha --exit"
   },
   "repository": {
     "type": "git",

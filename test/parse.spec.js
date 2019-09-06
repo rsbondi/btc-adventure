@@ -4,16 +4,27 @@ const assert = require('assert')
 let testdata = require('./testdata')
 rawtx = require('./rawtx')
 
+let url
 
-describe('test local page', () => {
+if (process.env["TESTDEPLOY"]) {
+    url = "https://rsbondi.github.io/btc-adventure/"
+} else {
+    url = 'http://127.0.0.1:1337/index.html'
+}
+
+
+describe(`test page at ${url}`, () => {
     const browser = new Browser();
     before(async function () {
-        var server = new StaticServer({
-            rootPath: '.',            // required, the root of the server file tree
-            port: 1337,               // required, the port to listen
-        });
+        if (!process.env["TESTDEPLOY"]) {
 
-        await server.start();
+            var server = new StaticServer({
+                rootPath: '.', 
+                port: 1337,
+            });
+
+            await server.start();
+        }
 
     });
 
@@ -29,7 +40,7 @@ describe('test local page', () => {
 
     it('should load title', next => {
         const h2 = 'Raw Bitcoin Transaction Breakdown'
-        browser.visit('http://127.0.0.1:1337/index.html', err => {
+        browser.visit(url, err => {
             browser.assert.text('h2', h2);
             next()
         });
