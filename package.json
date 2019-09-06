@@ -1,0 +1,27 @@
+{
+  "name": "btc-adventure-gh-pages",
+  "version": "1.0.0",
+  "description": "parse bitcoin transaction",
+  "main": "script.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "bmocha": "^2.1.2",
+    "static-server": "^2.2.1",
+    "zombie": "^6.1.4"
+  },
+  "scripts": {
+    "test": "bmocha --exit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rsbondi/btc-adventure.git"
+  },
+  "author": "Richard Bondi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rsbondi/btc-adventure/issues"
+  },
+  "homepage": "https://github.com/rsbondi/btc-adventure#readme"
+}

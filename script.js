@@ -192,7 +192,7 @@ var Script = {
         continue
       }
       if (codeops[byte]) commands.push(codeops[byte])
-      console.log('unknown opcode ' + byte + ' ' + b)
+      // console.log('unknown opcode ' + byte + ' ' + b)
     }
     return commands
   },
@@ -298,13 +298,16 @@ var Transaction = {
       var sigscript = Script.fromSig(scriptbytes)
       var siglen = scriptbytes.slice(0, 1)
       // :HELP script hash or ??? for witness here
-      addSpan('version', 'input ' + i + (sigscript[2] ? ' sig length = ' : ' redeemScript length = ') + siglen, Bytes.toHex(siglen))
+      if(siglen.length && siglen[0])
+        addSpan('version', 'input ' + i + (sigscript[2] ? ' sig length = ' : ' redeemScript length = ') + siglen, Bytes.toHex(siglen))
+      var scriptdisplay = sigscript[0]
       addSpan('script', 'input ' + i + (sigscript[2] ? ' signature' : ' redeemScript'), sigscript[0])
       addSpan('version', 'input ' + i + ' signature type', sigscript[1])
 
 
       var publen = scriptbytes.slice(siglen[0] + 1, siglen[0] + 2)
-      addSpan('nin', 'input ' + i + ' pub key length = ' + publen, Bytes.toHex(publen))
+      if(siglen.length && siglen[0])
+        addSpan('nin', 'input ' + i + ' pub key length = ' + publen, Bytes.toHex(publen))
       addSpan('script', 'input ' + i + ' pub key', sigscript[2])
 
       var sequence = reader.readInt(4)
