@@ -2,7 +2,7 @@ const Browser = require('zombie');
 const StaticServer = require('static-server');
 const assert = require('assert')
 let testdata = require('./testdata')
-rawtx = require('./rawtx')
+const rawtx = require('./rawtx')
 
 let url
 
@@ -17,7 +17,6 @@ describe(`test page at ${url}`, () => {
     const browser = new Browser();
     before(async function () {
         if (!process.env["TESTDEPLOY"]) {
-
             var server = new StaticServer({
                 rootPath: '.', 
                 port: 1337,
@@ -25,7 +24,6 @@ describe(`test page at ${url}`, () => {
 
             await server.start();
         }
-
     });
 
     function loadtx(tx) {
@@ -47,7 +45,7 @@ describe(`test page at ${url}`, () => {
     })
 
     function onetime(i, label, next, cb) {
-        data = testdata[i]
+        const data = testdata[i]
         if (label && !data[label]) {
             i++
             if (i == testdata.length) {
@@ -65,7 +63,6 @@ describe(`test page at ${url}`, () => {
                 onetime(i, label, next, cb)
             }
         })
-
     }
 
     it('should parse version', next => {
@@ -75,8 +72,6 @@ describe(`test page at ${url}`, () => {
             assert.strictEqual(version.innerHTML, data.version.html)
             assert.strictEqual(version.getAttribute('title'), data.version.title)
         })
-
-
     })
 
     it('should parse marker', next => {
@@ -102,7 +97,7 @@ describe(`test page at ${url}`, () => {
     })
 
     it('should present json', next => {
-        onetime(0, 'nin', next, data => {
+        onetime(0, '', next, data => {
             const json = browser.querySelector('#json')
             const have = JSON.parse(json.innerHTML)
             const want = data.json
@@ -117,7 +112,6 @@ describe(`test page at ${url}`, () => {
             })
         })
     })
-
 
     it('output text should match input text', next => {
         onetime(0, '', next, data => {
@@ -135,5 +129,4 @@ describe(`test page at ${url}`, () => {
             assert.strictEqual(inp.value, out.textContent)
         })
     })
-
 })
