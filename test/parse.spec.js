@@ -2,7 +2,7 @@ const Browser = require('zombie');
 const StaticServer = require('static-server');
 const assert = require('assert')
 let testdata = require('./testdata')
-const rawtx = require('./rawtx')
+const jdata = require('./json')
 
 let url
 
@@ -122,11 +122,30 @@ describe(`test page at ${url}`, () => {
     })
 
     it('output text matches in many txs', next => {
-        testdata = rawtx
+        testdata = jdata
         onetime(0, '', next, data => {
             const inp = browser.querySelector('textarea')
             const out = browser.querySelector('.result')
             assert.strictEqual(inp.value, out.textContent)
+        })
+    })
+
+    it('test json against auto generated data from bitcoin core', next => {
+        testdata = jdata
+        onetime(0, '', next, data => {
+            const json = browser.querySelector('#json')
+            const have = JSON.parse(json.innerHTML)
+            const want = data.json
+            assert.strictEqual(want.version, have.version)
+
+            want.vin.forEach((inp, i) => {
+                if (!inp.txid) return // skip coinbase
+                assert.strictEqual(have.vin[i].txid, inp.txid)
+            })
+
+            want.vout.forEach((out, i) => {
+                assert.strictEqual(have.vout[i].value, out.value)
+            })
         })
     })
 })
