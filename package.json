@@ -13,7 +13,7 @@
   },
   "scripts": {
     "test": "bmocha --exit",
-    "test-deploy": "TESTDEPLOY=1 bmocha --exit"
+    "test-deploy": "TESTDEPLOY=1 bmocha --timeout 5000 --exit"
   },
   "repository": {
     "type": "git",
@@ -24,5 +24,10 @@
   "bugs": {
     "url": "https://github.com/rsbondi/btc-adventure/issues"
   },
-  "homepage": "https://github.com/rsbondi/btc-adventure#readme"
+  "homepage": "https://github.com/rsbondi/btc-adventure#readme",
+  "dependencies": {
+    "puppeteer": "^1.20.0",
+    "puppeteer-core": "^1.20.0",
+    "selenium-webdriver": "^4.0.0-alpha.5"
+  }
 }

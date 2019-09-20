@@ -14,11 +14,10 @@ if (process.env["TESTDEPLOY"]) {
 
 
 describe(`test page at ${url}`, () => {
-    const browser = new Browser();
     before(async function () {
         if (!process.env["TESTDEPLOY"]) {
             var server = new StaticServer({
-                rootPath: '.', 
+                rootPath: '.',
                 port: 1337,
             });
 
@@ -26,7 +25,7 @@ describe(`test page at ${url}`, () => {
         }
     });
 
-    function loadtx(tx) {
+    function loadtx(browser, tx) {
         return new Promise((res, rej) => {
             browser.fill('textarea', tx)
             browser.pressButton('button').then(() => {
@@ -36,38 +35,44 @@ describe(`test page at ${url}`, () => {
     }
 
 
+    function onetime(i, label, cb) {
+        return new Promise((res, rej) => {
+            const data = testdata[i]
+            if (label && !data[label]) { res(); return }
+            const browser = new Browser();
+            browser.visit(url, err => {
+                loadtx(browser, data.tx).then(() => {
+                    cb(browser)
+                    res()
+                })
+            });
+        });
+    }
+
+    function testloop(label, next, cb) {
+        const promises = []
+        for (let i = 0; i < testdata.length; i++) {
+            const data = testdata[i]
+            // console.log(data.tx.slice(0, 50))
+            promises.push(
+                onetime(i, label, browser => cb(browser, data))
+            )
+        }
+        Promise.all(promises).then(() => next())
+
+    }
+
     it('should load title', next => {
         const h2 = 'Raw Bitcoin Transaction Breakdown'
+        const browser = new Browser();
         browser.visit(url, err => {
             browser.assert.text('h2', h2);
             next()
         });
     })
 
-    function onetime(i, label, next, cb) {
-        const data = testdata[i]
-        if (label && !data[label]) {
-            i++
-            if (i == testdata.length) {
-                next()
-                return
-            }
-            onetime(i, label, next, cb)
-            return
-        }
-        loadtx(data.tx).then(() => {
-            cb(data)
-            if (i == testdata.length - 1) next()
-            else {
-                i++
-                onetime(i, label, next, cb)
-            }
-        })
-    }
-
     it('should parse version', next => {
-        onetime(0, '', next, data => {
-            // console.log('test tx version', data.tx)
+        testloop('', next, (browser, data) => {
             const version = browser.querySelector('.version')
             assert.strictEqual(version.innerHTML, data.version.html)
             assert.strictEqual(version.getAttribute('title'), data.version.title)
@@ -75,21 +80,21 @@ describe(`test page at ${url}`, () => {
     })
 
     it('should parse marker', next => {
-        onetime(0, 'marker', next, data => {
+        testloop('marker', next, (browser, data) => {
             browser.assert.text('.marker', '00', data.marker.html)
             browser.assert.attribute('.marker', 'title', data.marker.title)
         })
     })
 
     it('should parse flag', next => {
-        onetime(0, 'flag', next, data => {
+        testloop('flag', next, (browser, data) => {
             browser.assert.text('.flag', data.flag.html)
             browser.assert.attribute('.flag', 'title', data.flag.title)
         })
     })
 
     it('should parse number of inputs', next => {
-        onetime(0, 'nin', next, data => {
+        testloop('nin', next, (browser, data) => {
             const nin = browser.querySelector('.nin')
             assert.strictEqual(nin.innerHTML, data.nin.html)
             assert.strictEqual(nin.getAttribute('title'), data.nin.title)
@@ -97,7 +102,7 @@ describe(`test page at ${url}`, () => {
     })
 
     it('should present json', next => {
-        onetime(0, '', next, data => {
+        testloop('', next, (browser, data) => {
             const json = browser.querySelector('#json')
             const have = JSON.parse(json.innerHTML)
             const want = data.json
@@ -114,7 +119,7 @@ describe(`test page at ${url}`, () => {
     })
 
     it('output text should match input text', next => {
-        onetime(0, '', next, data => {
+        testloop('', next, (browser, data) => {
             const inp = browser.querySelector('textarea')
             const out = browser.querySelector('.result')
             assert.strictEqual(inp.value, out.textContent)
@@ -123,7 +128,7 @@ describe(`test page at ${url}`, () => {
 
     it('output text matches in many txs', next => {
         testdata = jdata
-        onetime(0, '', next, data => {
+        testloop('', next, (browser, data) => {
             const inp = browser.querySelector('textarea')
             const out = browser.querySelector('.result')
             assert.strictEqual(inp.value, out.textContent)
@@ -132,7 +137,7 @@ describe(`test page at ${url}`, () => {
 
     it('test json against auto generated data from bitcoin core', next => {
         testdata = jdata
-        onetime(0, '', next, data => {
+        testloop('', next, (browser, data) => {
             const json = browser.querySelector('#json')
             const have = JSON.parse(json.innerHTML)
             const want = data.json
