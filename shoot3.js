@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer');
 const StaticServer = require('static-server');
 let testdata = require('./test/json')
 const url = 'http://127.0.0.1:1337/index.html'
-let browser, page
 
 class shoot {
     constructor(i, tx) {

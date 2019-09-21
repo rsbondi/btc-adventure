@@ -1,5 +1,4 @@
 const {Builder, By, Key, until} = require('selenium-webdriver');
-// const chrome = require('selenium-webdriver/chrome');
 
 const StaticServer = require('static-server');
 let testdata = require('./test/json')
