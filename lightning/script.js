@@ -5,15 +5,15 @@ const Bit = {
 
       return {
           read(n) {
-              const b = buf.slice(index, index+n) 
+              const b = buf.slice(index, index+n)
               index += n
-              return b              
+              return b
           },
           readInt(n) {
-              const int = this.read(n).split('').reduce(function(o, bit, i) { 
+              const int = this.read(n).split('').reduce(function(o, bit, i) {
                   return o.add(bigInt(bit).times(bigInt(2).pow(n-1-i))) // big endian
-                }, bigInt(0)) 
-                return  int.toJSNumber()                
+                }, bigInt(0))
+                return  int.toJSNumber()
           },
           remaining() {
               return buf.length - index
@@ -58,19 +58,20 @@ function binStr2hex(bin) {
 const decodeTypes = {
      1: {label: 'payment_hash',          process(data) { return binStr2hex(data) } },
     13: {label: 'description',           process(data) { return UTF8.getStringFromBytes(Uint8Array.from(Bit.str2bin(data)))}},
+    16: {label: 'secret',                process(data) { return binStr2hex(data) } },
     19: {label: 'payee_pubkey',          process(data) { return binStr2hex(data) }},
     23: {label: 'purpose_hash',          process(data) { return binStr2hex(data) }},
      6: {label: 'expiry',                process(data) { return Bit.Reader(data).readInt(data.length) }},
     24: {label: 'min_final_cltv_expiry', process(data) { return Bit.Reader(data).readInt(data.length) }},
-     9: {label: 'fallback_address',      process(data) { 
+     9: {label: 'fallback_address',      process(data) {
          let version = Bit.Reader(data).readInt(5)
          if(fallbacks[version]) version = fallbacks[version]; else version = 'v'+version
-         return version+'-'+binStr2hex(data.slice(5)) 
+         return version+'-'+binStr2hex(data.slice(5))
         }
     },
      3: {
             label: 'routing',
-            process(data) { 
+            process(data) {
                 const reader = Bit.Reader(data)
                 let routing = []
                 while(reader.remaining() >= 408) // why again trailing 4 bits???
@@ -81,10 +82,11 @@ const decodeTypes = {
                         fee_proportional_millionths: reader.readInt(32),
                         cltv_expiry_delta          : reader.readInt(16)
                     })
-                
+
                 return routing
             }
         },
+    5: {label: 'features', process(data) { return binStr2hex(data) } },
 }
 
 let pre = document.querySelector('pre')
@@ -124,7 +126,7 @@ const Payment = {
             for(let i=5-bin.length; i; i--) bin = '0'+bin
             return o + bin
         },'')
-        
+
         const reader = Bit.Reader(bin)
         const ts = reader.readInt(35)
 
